@@ -1,0 +1,14 @@
+{
+  "name": "aval-course-notice",
+  "version": "1.0.0",
+  "description": "AVAL Course Notice GAS Web App",
+  "scripts": {
+    "login": "clasp login",
+    "pull": "clasp pull",
+    "push": "clasp push",
+    "deploy": "clasp deploy"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.4.2"
+  }
+}

@@ -1,0 +1,5 @@
+node_modules/
+.clasprc.json
+.clasprc.json.bak
+.DS_Store
+*.log

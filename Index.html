@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>暐固科技 - Apple Sales Training 課程公告</title>
+  <!-- Google Fonts Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       1. 設計系統與全域樣式 (Design System & Globals)
+       ========================================================================== */
+    :root {
+      --bg-color: #f5f5f7;
+      --card-bg: #ffffff;
+      --text-main: #1d1d1f;
+      --text-muted: #86868b;
+      --accent-red: #d01c1c;
+      --accent-red-hover: #b01818;
+      --border-color: #e5e5e7;
+      --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+      --font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 60px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ==========================================================================
+       2. 標頭設計 (Header Styles)
+       ========================================================================== */
+    header {
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--accent-red);
+      margin-right: 4px;
+      font-size: 22px;
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       3. 主排版與卡片設計 (Main Layout & Cards)
+       ========================================================================== */
+    main {
+      margin-top: 40px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(0, 0, 0, 0.02);
+      margin-bottom: 32px;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--accent-red);
+      padding-left: 12px;
+    }
+
+    /* ==========================================================================
+       4. 課程表/日曆設計 (Calendar Styles)
+       ========================================================================== */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .admin-badge {
+      background-color: #ffebeb;
+      color: var(--accent-red);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-left: 8px;
+    }
+
+    .month-select {
+      font-family: var(--font-family);
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: #fff;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .month-select:focus {
+      border-color: var(--text-main);
+    }
+
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .calendar-table th {
+      text-align: center;
+      padding: 12px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .calendar-table td {
+      height: 90px;
+      border: 1px solid var(--border-color);
+      vertical-align: top;
+      padding: 6px;
+      position: relative;
+    }
+
+    .day-number {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .other-month-day {
+      color: #c7c7cc;
+      background-color: #fafafa;
+    }
+
+    .calendar-event-cell {
+      color: var(--text-main);
+      padding: 8px;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .event-date-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .event-name-label {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+      word-break: break-all;
+    }
+
+    /* ==========================================================================
+       5. 課程詳細說明設計 (Course Details Styles)
+       ========================================================================== */
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .detail-table tr {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .detail-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .detail-table td {
+      padding: 16px 0;
+      vertical-align: top;
+    }
+
+    .detail-label {
+      width: 100px;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    .detail-value {
+      font-size: 15px;
+      color: var(--text-main);
+    }
+
+    .detail-value ul {
+      list-style-type: none;
+    }
+
+    .detail-value li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 14px;
+    }
+
+    .detail-value li::before {
+      content: "•";
+      color: var(--accent-red);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+
+    .badge-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-color: var(--bg-color);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 20px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* ==========================================================================
+       6. 地圖區與報名網址 (Map & Registration Styles)
+       ========================================================================== */
+    .map-container {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      height: 250px;
+      margin-top: 16px;
+      position: relative;
+    }
+
+    .map-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-family);
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-red);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-red-hover);
+    }
+
+    .btn-secondary {
+      background-color: #fff;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-color);
+    }
+
+    .btn-block {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+    }
+
+    .registration-box {
+      background-color: #fafafa;
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .registration-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ==========================================================================
+       7. 共享資源與檔案上傳 (Resource & Upload Styles)
+       ========================================================================== */
+    .resource-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .resource-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background-color: #fafafa;
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .resource-item:hover {
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .file-icon {
+      font-size: 24px;
+      color: var(--accent-red);
+    }
+
+    .file-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .file-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .download-icon {
+      font-size: 18px;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .resource-item:hover .download-icon {
+      color: var(--accent-red);
+    }
+
+    /* 檔案上傳樣式 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: var(--font-family);
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-input:focus {
+      border-color: var(--text-main);
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      background-color: #fafafa;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent-red);
+      background-color: #fff;
+    }
+
+    .upload-icon {
+      font-size: 32px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .upload-text span {
+      color: var(--accent-red);
+      font-weight: 500;
+    }
+
+    .file-selected-box {
+      margin-top: 16px;
+      padding: 12px;
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .file-selected-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80%;
+    }
+
+    .remove-file-btn {
+      color: var(--accent-red);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* 進度條與狀態 */
+    .progress-container {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background-color: var(--border-color);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--accent-red);
+      transition: width 0.3s ease;
+    }
+
+    .status-message {
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .status-success { color: green; }
+    .status-error { color: var(--accent-red); }
+
+    /* ==========================================================================
+       8. 注意事項與聯絡資訊 (Notices & Contact Info Styles)
+       ========================================================================== */
+    .notice-list {
+      list-style-type: decimal;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .notice-list li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .contact-company {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .contact-phone, .contact-email {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .contact-phone:hover, .contact-email:hover {
+      color: var(--accent-red);
+    }
+
+    /* Skeleton Loader */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+      height: 20px;
+      margin-bottom: 12px;
+    }
+
+    .skeleton-calendar {
+      height: 300px;
+      border-radius: 12px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ==========================================================================
+       9. 響應式排版調整 (Responsive Adjustments)
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .calendar-table td {
+        height: 70px;
+      }
+      
+      .event-name-label {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 導覽列 -->
+  <header>
+    <div class="container header-container">
+      <a href="#" class="logo"><span></span> AVAL 暐固科技</a>
+      <nav>
+        <a href="#calendar-section">課程表</a>
+        <a href="#details-section">課程說明</a>
+        <a href="#location-section">上課地點</a>
+        <a href="#resources-section">教材共享</a>
+        <a href="#upload-section">作業繳交</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container" style="margin-top: 40px;">
+    <!-- 2. 主標題區 -->
+    <h1 class="page-title" id="web-title"><div class="skeleton" style="width: 300px; height: 38px;"></div></h1>
+    <p class="page-subtitle">暐固科技數位轉型系列課程 &middot; 培訓計畫公告</p>
+
+    <!-- 3. 主版型 Grid -->
+    <div class="grid-layout">
+      
+      <!-- 左欄 -->
+      <div class="left-column">
+        
+        <!-- 區塊：課程表 -->
+        <section id="calendar-section" class="card">
+          <div class="card-title">
+            <div class="calendar-header">
+              <span>Apple Sales Training 課程表</span>
+              <div style="display: flex; align-items: center;">
+                <select id="month-selector" class="month-select" style="display: none;" onchange="onMonthChange()"></select>
+                <span id="admin-indicator" class="admin-badge" style="display: none;">管理員模式</span>
+              </div>
+            </div>
+          </div>
+          <div id="calendar-loader" class="skeleton skeleton-calendar"></div>
+          <div id="calendar-container"></div>
+        </section>
+
+        <!-- 區塊：課程詳細說明 -->
+        <section id="details-section" class="card">
+          <div class="card-title">課程詳細說明</div>
+          <div id="details-loader">
+            <div class="skeleton" style="width: 100%;"></div>
+            <div class="skeleton" style="width: 90%;"></div>
+            <div class="skeleton" style="width: 80%;"></div>
+          </div>
+          <table class="detail-table" id="details-table" style="display: none;">
+            <tr>
+              <td class="detail-label">課程代碼</td>
+              <td class="detail-value" id="course-code"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">課程名稱</td>
+              <td class="detail-value" id="course-name" style="font-weight: 600;"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">課程大綱</td>
+              <td class="detail-value"><ul id="course-outline"></ul></td>
+            </tr>
+            <tr>
+              <td class="detail-label">上課日期</td>
+              <td class="detail-value" id="class-date"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">上課時間</td>
+              <td class="detail-value" id="class-time"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">參加名單</td>
+              <td class="detail-value"><ul id="participants"></ul></td>
+            </tr>
+            <tr>
+              <td class="detail-label">銷售演練</td>
+              <td class="detail-value"><span class="badge-icon" id="sales-drill"></span></td>
+            </tr>
+            <tr>
+              <td class="detail-label">課後作業</td>
+              <td class="detail-value"><span class="badge-icon" id="homework"></span></td>
+            </tr>
+            <tr>
+              <td class="detail-label">備註</td>
+              <td class="detail-value"><ul id="remarks"></ul></td>
+            </tr>
+          </table>
+        </section>
+
+      </div>
+
+      <!-- 右欄 -->
+      <div class="right-column">
+        
+        <!-- 區塊：上課地點與地圖 -->
+        <section id="location-section" class="card">
+          <div class="card-title">上課地點</div>
+          <div id="location-text" style="font-size: 14px; font-weight: 500;"></div>
+          <div class="map-container">
+            <iframe id="map-iframe" src=""></iframe>
+          </div>
+          <div class="btn-group">
+            <a id="btn-open-map" target="_blank" class="btn btn-secondary btn-block">開啟 Google 地圖導航</a>
+          </div>
+        </section>
+
+        <!-- 區塊：線上報名網址 -->
+        <section id="registration-section" class="card">
+          <div class="card-title">線上報名登記</div>
+          <div class="registration-box">
+            <div class="registration-text" id="reg-text">加載報名資訊中...</div>
+            <a id="btn-registration" target="_blank" class="btn btn-primary btn-block">前往線上報名表單</a>
+            <div id="reg-l1-l3-text" style="font-size: 12px; color: var(--text-muted); margin-top: 12px; text-align: left; padding: 10px; border-left: 2px solid var(--accent-red); background: #fbfbfb;"></div>
+          </div>
+        </section>
+
+        <!-- 區塊：共享資源下載區 (Resource) -->
+        <section id="resources-section" class="card">
+          <div class="card-title">共享資源下載</div>
+          <div id="resources-loader">
+            <div class="skeleton" style="width: 100%;"></div>
+            <div class="skeleton" style="width: 90%;"></div>
+          </div>
+          <div class="resource-list" id="resource-container"></div>
+        </section>
+
+        <!-- 區塊：學員作業上傳區 (Upload) -->
+        <section id="upload-section" class="card">
+          <div class="card-title">上課資料與作業繳交</div>
+          <form id="upload-form" onsubmit="handleFormSubmit(event)">
+            
+            <div class="form-group">
+              <label class="form-label" for="student-name">中文全名 <span style="color: var(--accent-red);">*</span></label>
+              <input type="text" id="student-name" class="form-input" placeholder="請輸入學員姓名" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">選擇繳交的檔案 <span style="color: var(--accent-red);">*</span></label>
+              <div class="upload-zone" id="upload-dropzone" onclick="triggerFileInput()">
+                <div class="upload-icon">↑</div>
+                <div class="upload-text">將檔案拖曳至此，或 <span>點擊上傳</span></div>
+                <div class="upload-text" style="font-size: 11px; margin-top: 6px; color: var(--text-muted);">支援 PDF、Word、PPT、圖片等格式 (限 15MB 內)</div>
+                <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+              </div>
+              
+              <!-- 顯示已選取檔案 -->
+              <div class="file-selected-box" id="file-display-box">
+                <span class="file-selected-name" id="selected-file-name"></span>
+                <span class="remove-file-btn" onclick="removeSelectedFile(event)">刪除</span>
+              </div>
+            </div>
+
+            <button type="submit" id="submit-upload-btn" class="btn btn-primary btn-block" disabled>確認上傳繳交</button>
+            
+            <!-- 進度與上傳狀態 -->
+            <div class="progress-container" id="progress-area">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+              <div class="status-message" id="upload-status"></div>
+            </div>
+          </form>
+        </section>
+
+        <!-- 區塊：課程相關訊息聯絡人 -->
+        <section id="contact-section" class="card">
+          <div class="card-title">聯絡我們</div>
+          <div class="contact-item">
+            <span class="contact-company" id="contact-name-label"></span>
+            <a href="" id="contact-phone-href" class="contact-phone">電話：<span id="contact-phone-text"></span></a>
+            <a href="" id="contact-email-href" class="contact-email">電郵：<span id="contact-email-text"></span></a>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // 全域變數，由伺服器端範本插入
+    const isAdmin = <%= isAdmin %>;
+    let selectedFile = null;
+    let availableMonths = [];
+    
+    // 初始化網頁
+    window.onload = function() {
+      // 顯示管理員狀態
+      if (isAdmin) {
+        document.getElementById('admin-indicator').style.display = 'inline-block';
+        document.getElementById('month-selector').style.display = 'inline-block';
+      }
+      
+      // 載入資料庫內容
+      loadPageContent();
+      
+      // 載入 Drive 資源
+      loadDriveResources();
+      
+      // 註冊 Drag & Drop 事件
+      initDragAndDrop();
+    };
+
+    /**
+     * 從 Apps Script 後端讀取網頁主內容與事件
+     */
+    function loadPageContent(monthStr = null) {
+      // 顯示加載骨架
+      document.getElementById('calendar-loader').style.display = 'block';
+      document.getElementById('calendar-container').innerHTML = '';
+      document.getElementById('details-loader').style.display = 'block';
+      document.getElementById('details-table').style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            renderPageDetails(response.config);
+            
+            // 處理月份下拉選單 (只有管理員可以看到所有月份，一般人看 Active)
+            if (isAdmin && availableMonths.length === 0) {
+              availableMonths = response.calendars;
+              const selector = document.getElementById('month-selector');
+              selector.innerHTML = '';
+              availableMonths.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.yearMonth;
+                opt.innerText = formatYearMonthZH(m.yearMonth) + (m.status === 'Archived' ? ' (已封存)' : '');
+                if (m.yearMonth === response.activeMonth) {
+                  opt.selected = true;
+                }
+                selector.appendChild(opt);
+              });
+            }
+            
+            // 渲染日曆
+            renderCalendar(response.activeMonth, response.events);
+            
+            document.getElementById('calendar-loader').style.display = 'none';
+            document.getElementById('details-loader').style.display = 'none';
+            document.getElementById('details-table').style.display = 'table';
+          } else {
+            alert('載入網頁內容失敗: ' + response.error);
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('通訊失敗: ' + err.toString());
+        })
+        .getPageData(isAdmin, monthStr);
+    }
+
+    /**
+     * 讀取並渲染共享資源下載區
+     */
+    function loadDriveResources() {
+      document.getElementById('resources-loader').style.display = 'block';
+      const container = document.getElementById('resource-container');
+      container.innerHTML = '';
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('resources-loader').style.display = 'none';
+          if (response.success) {
+            if (response.files.length === 0) {
+              container.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px;">目前尚無共享教材檔案</div>';
+              return;
+            }
+            
+            response.files.forEach(file => {
+              const fileTypeEmoji = getFileIcon(file.mimeType);
+              const card = document.createElement('a');
+              card.className = 'resource-item';
+              card.href = file.downloadUrl;
+              card.target = '_blank';
+              card.innerHTML = `
+                <div class="file-info">
+                  <span class="file-icon">${fileTypeEmoji}</span>
+                  <div>
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-meta">${file.size} &middot; 更新於 ${file.updated}</div>
+                  </div>
+                </div>
+                <span class="download-icon">↓</span>
+              `;
+              container.appendChild(card);
+            });
+          } else {
+            container.innerHTML = `<div style="font-size: 13px; color: var(--accent-red); text-align: center; padding: 20px;">載入教材失敗: ${response.error}</div>`;
+          }
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById('resources-loader').style.display = 'none';
+          container.innerHTML = `<div style="font-size: 13px; color: var(--accent-red); text-align: center; padding: 20px;">連線失敗: ${err.toString()}</div>`;
+        })
+        .getSharedResources();
+    }
+
+    /**
+     * 管理員切換月份事件
+     */
+    function onMonthChange() {
+      const monthStr = document.getElementById('month-selector').value;
+      loadPageContent(monthStr);
+    }
+
+    /**
+     * 渲染文字設定
+     */
+    function renderPageDetails(config) {
+      document.getElementById('web-title').innerText = config.course_name || '課程公告';
+      document.getElementById('course-code').innerText = config.course_code || '';
+      document.getElementById('course-name').innerText = config.course_name || '';
+      document.getElementById('class-date').innerText = config.class_date || '';
+      document.getElementById('class-time').innerText = config.class_time || '';
+      
+      // 銷售演練 & 課後作業
+      setCheckmark(document.getElementById('sales-drill'), config.sales_drill);
+      setCheckmark(document.getElementById('homework'), config.homework);
+      
+      // 列表欄位解析
+      renderList(document.getElementById('course-outline'), config.course_outline);
+      renderList(document.getElementById('participants'), config.participants);
+      renderList(document.getElementById('remarks'), config.remarks);
+      
+      // 報名資訊
+      document.getElementById('reg-text').innerText = config.registration_text || '';
+      document.getElementById('btn-registration').href = config.registration_url || '#';
+      document.getElementById('reg-l1-l3-text').innerText = 'L1-L3：' + (config.reg_l1_l3 || '');
+      
+      // 其他注意事項
+      renderList(document.getElementById('notices'), config.notices, 'ol');
+      
+      // 上課地點與地圖
+      const location = config.location || '';
+      document.getElementById('location-text').innerText = location;
+      const encodedLoc = encodeURIComponent(location);
+      document.getElementById('map-iframe').src = `https://maps.google.com/maps?q=${encodedLoc}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+      document.getElementById('btn-open-map').href = `https://www.google.com/maps/search/?api=1&query=${encodedLoc}`;
+      
+      // 聯絡人
+      const contactRaw = config.contact_info || '';
+      const parts = contactRaw.split('|');
+      if (parts.length >= 3) {
+        document.getElementById('contact-name-label').innerText = parts[0].trim();
+        const phone = parts[1].trim();
+        const email = parts[2].trim();
+        
+        document.getElementById('contact-phone-text').innerText = phone;
+        document.getElementById('contact-phone-href').href = `tel:${phone}`;
+        
+        document.getElementById('contact-email-text').innerText = email;
+        document.getElementById('contact-email-href').href = `mailto:${email}`;
+      }
+    }
+
+    /**
+     * 輔助渲染勾選符號
+     */
+    function setCheckmark(element, val) {
+      if (val === '◎' || val === 'O' || val === 'o' || val === 'true') {
+        element.innerText = '✓';
+        element.style.color = '#27ae60';
+        element.style.backgroundColor = '#e8f8f0';
+      } else if (!val || val === '✕' || val === 'X' || val === 'x' || val === 'false') {
+        element.innerText = '✕';
+        element.style.color = '#c0392b';
+        element.style.backgroundColor = '#fde8e8';
+      } else {
+        // 其他客製化文字
+        element.innerText = val;
+        element.style.width = 'auto';
+        element.style.padding = '2px 8px';
+        element.style.borderRadius = '4px';
+        element.style.color = 'var(--text-main)';
+        element.style.backgroundColor = 'var(--bg-color)';
+      }
+    }
+
+    /**
+     * 輔助渲染換行清單
+     */
+    function renderList(container, text, type = 'ul') {
+      container.innerHTML = '';
+      if (!text) return;
+      
+      // 統一以換行切分，過濾掉多餘空白行
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+      lines.forEach(line => {
+        // 移除原有的 bullet point (• 或數字標號)
+        let cleaned = line.replace(/^[•\-\d\.\s]+/, '');
+        
+        const li = document.createElement('li');
+        li.innerText = cleaned;
+        container.appendChild(li);
+      });
+    }
+
+    /**
+     * 格式化年月顯示：2026-06 -> 2026 年 6 月
+     */
+    function formatYearMonthZH(ym) {
+      const parts = ym.split('-');
+      if (parts.length === 2) {
+        return `${parts[0]} 年 ${parseInt(parts[1])} 月`;
+      }
+      return ym;
+    }
+
+    /**
+     * 取得檔案類型的對應圖示
+     */
+    function getFileIcon(mimeType) {
+      if (mimeType.includes('pdf')) return '📄';
+      if (mimeType.includes('msword') || mimeType.includes('officedocument.word')) return '📝';
+      if (mimeType.includes('powerpoint') || mimeType.includes('officedocument.presentation')) return '📊';
+      if (mimeType.includes('excel') || mimeType.includes('officedocument.spreadsheet')) return '📈';
+      if (mimeType.includes('image')) return '🖼️';
+      return '📁';
+    }
+
+    /* ==========================================================================
+       10. 學生作業上傳處理與互動
+       ========================================================================== */
+    function triggerFileInput() {
+      document.getElementById('file-input').click();
+    }
+
+    function handleFileSelect(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        setUploadFile(files[0]);
+      }
+    }
+
+    function setUploadFile(file) {
+      // 限制 15MB 檔案大小
+      const maxSize = 15 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert('檔案大小超過 15MB 限制，請壓縮後重新上傳。');
+        removeSelectedFile();
+        return;
+      }
+      
+      selectedFile = file;
+      document.getElementById('selected-file-name').innerText = `${file.name} (${formatBytesJS(file.size)})`;
+      document.getElementById('file-display-box').style.display = 'flex';
+      document.getElementById('submit-upload-btn').disabled = false;
+    }
+
+    function removeSelectedFile(e) {
+      if (e) e.stopPropagation();
+      selectedFile = null;
+      document.getElementById('file-input').value = '';
+      document.getElementById('file-display-box').style.display = 'none';
+      document.getElementById('submit-upload-btn').disabled = true;
+    }
+
+    // Drag and Drop 初始化
+    function initDragAndDrop() {
+      const dropzone = document.getElementById('upload-dropzone');
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+        }, false);
+      });
+
+      dropzone.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          setUploadFile(files[0]);
+        }
+      }, false);
+    }
+
+    /**
+     * 處理表單提交（上傳作業）
+     */
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const studentName = document.getElementById('student-name').value;
+      if (!studentName.trim()) {
+        alert('請輸入您的中文全名');
+        return;
+      }
+      
+      if (!selectedFile) {
+        alert('請選取要繳交的檔案');
+        return;
+      }
+
+      // 顯示進度列
+      const progressArea = document.getElementById('progress-area');
+      const progressFill = document.getElementById('progress-fill');
+      const statusMsg = document.getElementById('upload-status');
+      
+      progressArea.style.display = 'block';
+      progressFill.style.width = '10%';
+      statusMsg.className = 'status-message';
+      statusMsg.innerText = '讀取檔案中...';
+      
+      // 停用送出按鈕防止重複提交
+      document.getElementById('submit-upload-btn').disabled = true;
+
+      // 讀取檔案轉換為 Base64
+      const reader = new FileReader();
+      
+      reader.onload = function(evt) {
+        progressFill.style.width = '30%';
+        statusMsg.innerText = '正在傳輸檔案至 Google 雲端硬碟...';
+        
+        const base64Data = evt.target.result.split(',')[1];
+        
+        // 呼叫 GAS 後端
+        google.script.run
+          .withSuccessHandler(function(response) {
+            if (response.success) {
+              progressFill.style.width = '100%';
+              statusMsg.className = 'status-message status-success';
+              statusMsg.innerText = `✓ 上傳成功！已將「${response.fileName}」存入您的專屬資料夾。`;
+              
+              // 重設表單與選取檔案
+              document.getElementById('student-name').value = '';
+              removeSelectedFile();
+            } else {
+              progressFill.style.width = '0%';
+              statusMsg.className = 'status-message status-error';
+              statusMsg.innerText = `✕ 上傳失敗：${response.error}`;
+              document.getElementById('submit-upload-btn').disabled = false;
+            }
+          })
+          .withFailureHandler(function(err) {
+            progressFill.style.width = '0%';
+            statusMsg.className = 'status-message status-error';
+            statusMsg.innerText = `✕ 系統連線發生錯誤，請稍後再試。`;
+            document.getElementById('submit-upload-btn').disabled = false;
+          })
+          .uploadFile(studentName, selectedFile.name, base64Data, selectedFile.type);
+      };
+      
+      reader.onerror = function() {
+        alert('檔案讀取錯誤，請更換檔案後重新嘗試。');
+        progressArea.style.display = 'none';
+        document.getElementById('submit-upload-btn').disabled = false;
+      };
+      
+      reader.readAsDataURL(selectedFile);
+    }
+
+    function formatBytesJS(bytes, decimals = 1) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    /* ==========================================================================
+       11. 自適應月曆合併渲染引擎 (Horizontal Merging Algorithm)
+       ========================================================================== */
+    function renderCalendar(yearMonth, events) {
+      const container = document.getElementById('calendar-container');
+      container.innerHTML = '';
+      
+      const parts = yearMonth.split('-');
+      const year = parseInt(parts[0]);
+      const month = parseInt(parts[1]);
+      
+      // 計算當月第 1 天及星期幾
+      const firstDay = new Date(year, month - 1, 1);
+      const startDayOfWeek = firstDay.getDay(); // 0:日, 1:一, 2:二, 3:三, 4:四, 5:五, 6:六
+      
+      // 當月總天數
+      const lastDay = new Date(year, month, 0);
+      const totalDays = lastDay.getDate();
+      
+      // 前一個月的最後幾天（填補月曆首行空白）
+      const prevMonthLast = new Date(year, month - 1, 0);
+      const prevMonthLastDay = prevMonthLast.getDate();
+      
+      // 建立月曆表格
+      const table = document.createElement('table');
+      table.className = 'calendar-table';
+      
+      // 渲染星期表頭
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      weekdays.forEach(day => {
+        const th = document.createElement('th');
+        th.innerText = day;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      
+      const tbody = document.createElement('tbody');
+      
+      // 構造完整的「日曆格子陣列」（填滿整週，方便分列渲染）
+      const gridDays = [];
+      
+      // 1. 填入上月剩餘日期
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const d = prevMonthLastDay - i;
+        gridDays.push({
+          dayNum: d,
+          isCurrentMonth: false,
+          dateStr: '' // 上月不判斷課程事件
+        });
+      }
+      
+      // 2. 填入當月日期
+      for (let d = 1; d <= totalDays; d++) {
+        const dStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        gridDays.push({
+          dayNum: d,
+          isCurrentMonth: true,
+          dateStr: dStr
+        });
+      }
+      
+      // 3. 填入下月剩餘日期（補足最後一週）
+      let nextMonthDay = 1;
+      while (gridDays.length % 7 !== 0) {
+        gridDays.push({
+          dayNum: nextMonthDay++,
+          isCurrentMonth: false,
+          dateStr: ''
+        });
+      }
+      
+      // 4. 按週拆分，逐週渲染
+      for (let w = 0; w < gridDays.length; w += 7) {
+        const week = gridDays.slice(w, w + 7);
+        const tr = document.createElement('tr');
+        
+        let i = 0;
+        while (i < 7) {
+          const dayData = week[i];
+          
+          // 非當月日期直接渲染普通灰格
+          if (!dayData.isCurrentMonth) {
+            const td = document.createElement('td');
+            td.className = 'other-month-day';
+            td.innerHTML = `<span class="day-number">${dayData.dayNum}</span>`;
+            tr.appendChild(td);
+            i++;
+            continue;
+          }
+          
+          // 搜尋此日期是否有課程事件
+          const activeEvent = findEventForDate(dayData.dateStr, events);
+          
+          if (activeEvent) {
+            // 計算合併格長度 (span)：向後查找此週內有多少天是同一個事件且也是當月日期
+            let span = 1;
+            while (i + span < 7) {
+              const nextDayData = week[i + span];
+              if (!nextDayData.isCurrentMonth) break;
+              const nextEvent = findEventForDate(nextDayData.dateStr, events);
+              
+              // 若下個日期有相同的事件名稱，則納入合併
+              if (nextEvent && nextEvent.name === activeEvent.name) {
+                span++;
+              } else {
+                break;
+              }
+            }
+            
+            // 建立合併格
+            const td = document.createElement('td');
+            td.colSpan = span;
+            td.className = 'calendar-event-cell';
+            td.style.backgroundColor = activeEvent.color || '#e1e1e1';
+            
+            // 收集合併格內所有日子的天數
+            const daysInSpan = [];
+            for (let s = 0; s < span; s++) {
+              daysInSpan.push(week[i + s].dayNum);
+            }
+            
+            // 標示日期區間：例如 "1–5日"
+            let dateLabel = daysInSpan.length > 1 
+              ? `${daysInSpan[0]}–${daysInSpan[daysInSpan.length - 1]}日`
+              : `${daysInSpan[0]}日`;
+              
+            td.innerHTML = `
+              <div class="event-date-label">${dateLabel}</div>
+              <div class="event-name-label">${activeEvent.name}</div>
+            `;
+            tr.appendChild(td);
+            i += span;
+          } else {
+            // 普通當月無課日期
+            const td = document.createElement('td');
+            td.innerHTML = `<span class="day-number">${dayData.dayNum}</span>`;
+            tr.appendChild(td);
+            i++;
+          }
+        }
+        tbody.appendChild(tr);
+      }
+      
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    /**
+     * 尋找特定日期對應的事件
+     */
+    function findEventForDate(dateStr, events) {
+      if (!dateStr || !events) return null;
+      // 比對日期：dateStr 是否落在事件的 [startDate, endDate] 區間內
+      return events.find(e => dateStr >= e.startDate && dateStr <= e.endDate) || null;
+    }
+  </script>
+</body>
+</html>
