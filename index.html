@@ -622,7 +622,397 @@
     }
 
     /* ==========================================================================
-       9. 響應式排版調整 (Responsive Adjustments)
+       9. 後台管理面板與登入樣式 (Admin Dashboard & Login CSS)
+       ========================================================================== */
+    .admin-login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      width: 100%;
+      max-width: 360px;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+    }
+    .login-logo {
+      font-size: 40px;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+    .login-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+    }
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.6);
+      font-size: 15px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .login-input:focus {
+      border-color: var(--accent-red);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(182, 38, 48, 0.15);
+    }
+    .login-error-msg {
+      font-size: 12px;
+      color: var(--accent-red);
+      margin-bottom: 15px;
+      min-height: 18px;
+    }
+    
+    /* 搖晃動畫 */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .shake-animation {
+      animation: shake 0.4s ease;
+    }
+    
+    /* 懸浮按鈕 */
+    .admin-fab {
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 999;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-fab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      background: #333333;
+    }
+    
+    /* 後台管理面板 Modal */
+    .admin-panel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      animation: fadeIn 0.3s ease;
+    }
+    .admin-panel-card {
+      background: #ffffff;
+      width: 90%;
+      max-width: 960px;
+      height: 80vh;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .admin-panel-header {
+      padding: 20px 25px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+    }
+    .admin-panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .admin-close-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .admin-close-btn:hover {
+      color: var(--text-main);
+    }
+    .admin-panel-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .admin-sidebar {
+      width: 200px;
+      border-right: 1px solid var(--border-color);
+      background: #fdfdfd;
+      padding: 20px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .admin-tab-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      border: none;
+      background: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .admin-tab-btn:hover {
+      background: rgba(0, 0, 0, 0.03);
+      color: var(--text-main);
+    }
+    .admin-tab-btn.active {
+      background: rgba(182, 38, 48, 0.08);
+      color: var(--accent-red);
+    }
+    .admin-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+    .admin-tab-content {
+      display: none;
+    }
+    .admin-tab-content.active {
+      display: block;
+    }
+    
+    /* 表單項目 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="url"],
+    .form-group input[type="password"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-main);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent-red);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .admin-footer-actions {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    /* 日曆管理專用 */
+    .calendar-admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .events-table-container {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .events-admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .events-admin-table th,
+    .events-admin-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .events-admin-table th {
+      background: #f9f9f9;
+      font-weight: 500;
+      color: var(--text-muted);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .events-admin-table input {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 6px;
+      font-size: 12px;
+    }
+    .btn-delete-row {
+      background: none;
+      border: none;
+      color: var(--accent-red);
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-delete-row:hover {
+      text-decoration: underline;
+    }
+    .months-admin-section {
+      background: #fafafa;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-top: 20px;
+    }
+    .admin-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--text-main);
+    }
+    .months-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .month-status-card {
+      background: #ffffff;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .month-status-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .month-status-select {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+    }
+    
+    /* 上傳紀錄專用 */
+    .logs-admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .logs-table-container {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .logs-admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .logs-admin-table th,
+    .logs-admin-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .logs-admin-table th {
+      background: #f9f9f9;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .logs-admin-table tr:hover {
+      background: #fafafa;
+    }
+    .link-table {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    .link-table:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       10. 響應式排版調整 (Responsive Adjustments)
        ========================================================================== */
     @media (max-width: 900px) {
       .grid-layout {
@@ -635,6 +1025,29 @@
       
       .event-name-label {
         font-size: 10px;
+      }
+
+      .admin-panel-card {
+        width: 95%;
+        height: 90vh;
+      }
+
+      .admin-panel-body {
+        flex-direction: column;
+      }
+
+      .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px;
+      }
+
+      .admin-tab-btn {
+        white-space: nowrap;
+        padding: 8px 12px;
       }
     }
   </style>
@@ -825,6 +1238,193 @@
     </div>
   </div>
 
+  <!-- ==========================================================================
+       後端管理系統 HTML 元素
+       ========================================================================== -->
+  <!-- 管理員登入遮罩視窗 -->
+  <div class="admin-login-overlay" id="admin-login-overlay" style="display: none;">
+    <div class="login-card">
+      <div class="login-logo"></div>
+      <div class="login-title">系統管理員登入</div>
+      <div class="login-subtitle">請輸入管理密碼以存取後台設定</div>
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <input type="password" id="admin-password-input" class="login-input" placeholder="密碼" required autocomplete="current-password">
+        <div class="login-error-msg" id="login-error-msg"></div>
+        <button type="submit" class="btn btn-primary btn-block">驗證登入</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 「⚙️ 管理後台」懸浮按鈕 -->
+  <button class="admin-fab" id="admin-fab" style="display: none;" onclick="toggleAdminPanel(true)">
+    ⚙️ 管理後台
+  </button>
+
+  <!-- 後台控制台彈出視窗 -->
+  <div class="admin-panel-overlay" id="admin-panel-overlay" style="display: none;">
+    <div class="admin-panel-card">
+      <div class="admin-panel-header">
+        <div class="admin-panel-title"> AVAL 課程公告管理控制台</div>
+        <button class="admin-close-btn" onclick="toggleAdminPanel(false)">✕</button>
+      </div>
+      <div class="admin-panel-body">
+        <!-- 左側導覽頁籤 -->
+        <div class="admin-sidebar">
+          <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'tab-general')">網頁文字內容</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-calendar')">日曆行程管理</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
+        </div>
+        
+        <!-- 右側內容區 -->
+        <div class="admin-content">
+          <!-- Tab 1: 網頁文字內容 -->
+          <div class="admin-tab-content active" id="tab-general">
+            <form id="form-general-config" onsubmit="saveGeneralConfig(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-course-code">課程代碼</label>
+                  <input type="text" id="edit-course-code" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit-course-name">課程名稱</label>
+                  <input type="text" id="edit-course-name" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-course-outline">課程大綱 (每行一項)</label>
+                <textarea id="edit-course-outline" rows="5" required></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-class-date">上課日期</label>
+                  <input type="text" id="edit-class-date" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit-class-time">上課時間</label>
+                  <input type="text" id="edit-class-time" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-sales-drill">銷售演練 (留空或填入「◎」)</label>
+                  <input type="text" id="edit-sales-drill">
+                </div>
+                <div class="form-group">
+                  <label for="edit-homework">課後作業 (留空或填入「◎」)</label>
+                  <input type="text" id="edit-homework">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-participants">參加名單 (以換行或空格分隔姓名)</label>
+                <textarea id="edit-participants" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="edit-remarks">備註事項 (每行一項)</label>
+                <textarea id="edit-remarks" rows="4"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="edit-location">上課地點</label>
+                <input type="text" id="edit-location" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-reg-text">報名說明文字</label>
+                  <input type="text" id="edit-reg-text" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit-reg-url">Google Form 報名連結</label>
+                  <input type="url" id="edit-reg-url" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-reg-l1-l3">L1-L3 報名說明</label>
+                <input type="text" id="edit-reg-l1-l3" required>
+              </div>
+              <div class="form-group">
+                <label for="edit-notices">其他重要注意事項 (每行一項)</label>
+                <textarea id="edit-notices" rows="4"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="edit-contact-info">聯絡資訊 (格式：公司 部門 聯絡人 | 電話 | 信箱)</label>
+                <input type="text" id="edit-contact-info" required>
+              </div>
+              <div class="form-group">
+                <label for="edit-admin-password">管理密碼變更 (留空代表不變更)</label>
+                <input type="password" id="edit-admin-password" placeholder="請輸入新密碼">
+              </div>
+              
+              <div class="admin-footer-actions">
+                <button type="submit" class="btn btn-primary" id="btn-save-general">儲存網頁文字</button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Tab 2: 日曆行程管理 -->
+          <div class="admin-tab-content" id="tab-calendar">
+            <div class="calendar-admin-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="admin-select-month" style="font-weight: 500; font-size: 14px;">選取編輯月份：</label>
+                <select id="admin-select-month" onchange="loadAdminEvents()"></select>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="addEventRow()">＋ 新增行程事件</button>
+            </div>
+            
+            <div class="events-table-container">
+              <table class="events-admin-table">
+                <thead>
+                  <tr>
+                    <th>開始日期</th>
+                    <th>結束日期</th>
+                    <th>事件/課程名稱</th>
+                    <th>顯示顏色</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-events-list"></tbody>
+              </table>
+            </div>
+            
+            <!-- 月份啟用/封存管理 -->
+            <div class="months-admin-section">
+              <div class="admin-section-title">歷史月份與封存管理</div>
+              <div class="months-grid" id="admin-months-grid"></div>
+            </div>
+            
+            <div class="admin-footer-actions">
+              <button class="btn btn-primary" onclick="saveAdminCalendarData()">儲存行程與月份設定</button>
+            </div>
+          </div>
+          
+          <!-- Tab 3: 學員作業紀錄 -->
+          <div class="admin-tab-content" id="tab-logs">
+            <div class="logs-admin-header">
+              <div class="admin-section-title" style="margin-bottom: 0;">學員繳交紀錄列表 (從試算表即時載入)</div>
+              <button class="btn btn-secondary btn-sm" onclick="fetchAdminUploadLogs()">🔄 重新整理</button>
+            </div>
+            <div class="logs-table-container">
+              <table class="logs-admin-table">
+                <thead>
+                  <tr>
+                    <th>時間</th>
+                    <th>學員姓名</th>
+                    <th>檔名</th>
+                    <th>檔案下載</th>
+                    <th>學員雲端資料夾</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-logs-list">
+                  <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">載入中...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // 配置您的 Google Apps Script Web App API 網址 (必填)
     const API_URL = "https://script.google.com/macros/s/AKfycbwADOog_qCbV7Ucrp-dnLZ2xbc5sw1w4Zi6eELgB_3W1faIfUsn8F8jy69byQ2P-8BrhA/exec";
@@ -834,23 +1434,130 @@
     let selectedFile = null;
     let availableMonths = [];
     
+    // 全域變數：儲存目前載入的後台資料，以便管理面板讀取
+    let gConfig = {}; 
+    let gEvents = []; 
+    let gCalendars = []; 
+    let currentSelectedMonth = ""; 
+    
     // 初始化網頁
     window.onload = function() {
-      // 顯示管理員狀態
+      // 顯示管理員狀態與檢查登入
       if (isAdmin) {
         document.getElementById('admin-indicator').style.display = 'inline-block';
         document.getElementById('month-selector').style.display = 'inline-block';
+        checkAdminLogin();
+      } else {
+        // 一般用戶正常載入
+        loadPageContent();
+        loadDriveResources();
+        initDragAndDrop();
       }
-      
-      // 載入資料庫內容
-      loadPageContent();
-      
-      // 載入 Drive 資源
-      loadDriveResources();
-      
-      // 註冊 Drag & Drop 拖放事件
-      initDragAndDrop();
     };
+
+    /**
+     * 檢查管理員是否已登入
+     */
+    function checkAdminLogin() {
+      const pwd = sessionStorage.getItem('admin_password');
+      if (!pwd) {
+        showLoginOverlay(true);
+      } else {
+        // 驗證密碼是否依舊有效
+        verifyAdminPassword(pwd);
+      }
+    }
+
+    /**
+     * 呼叫 API 驗證密碼是否正確
+     */
+    function verifyAdminPassword(pwd) {
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'verifyAdmin', password: pwd })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP 錯誤: ' + r.status);
+        return r.json();
+      })
+      .then(res => {
+        if (res.success) {
+          showLoginOverlay(false);
+          document.getElementById('admin-fab').style.display = 'flex';
+          loadPageContent();
+          loadDriveResources();
+          initDragAndDrop();
+        } else {
+          sessionStorage.removeItem('admin_password');
+          showLoginOverlay(true);
+          document.getElementById('login-error-msg').innerText = '登入認證已失效，請重新輸入密碼';
+        }
+      })
+      .catch(err => {
+        console.error("驗證密碼失敗: ", err);
+        alert("連線驗證失敗，將重試或請檢查網路連線。");
+        // 容錯處理：若連線暫時失敗，可讓使用者看到唯讀的前台
+        loadPageContent();
+        loadDriveResources();
+        initDragAndDrop();
+      });
+    }
+
+    /**
+     * 顯示或隱藏登入遮罩
+     */
+    function showLoginOverlay(show) {
+      const overlay = document.getElementById('admin-login-overlay');
+      overlay.style.display = show ? 'flex' : 'none';
+      if (show) {
+        document.getElementById('admin-password-input').focus();
+      }
+    }
+
+    /**
+     * 處理登入表單提交
+     */
+    function handleAdminLogin(event) {
+      event.preventDefault();
+      const pwdInput = document.getElementById('admin-password-input');
+      const errorMsg = document.getElementById('login-error-msg');
+      const card = document.querySelector('.login-card');
+      const pwd = pwdInput.value;
+      
+      errorMsg.innerText = '驗證中...';
+      
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'verifyAdmin', password: pwd })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          sessionStorage.setItem('admin_password', pwd);
+          showLoginOverlay(false);
+          document.getElementById('admin-fab').style.display = 'flex';
+          errorMsg.innerText = '';
+          pwdInput.value = '';
+          // 載入內容
+          loadPageContent();
+          loadDriveResources();
+          initDragAndDrop();
+        } else {
+          errorMsg.innerText = '密碼錯誤，請重新輸入';
+          pwdInput.value = '';
+          card.classList.add('shake-animation');
+          setTimeout(() => {
+            card.classList.remove('shake-animation');
+            pwdInput.focus();
+          }, 400);
+        }
+      })
+      .catch(err => {
+        errorMsg.innerText = '連線失敗: ' + err.toString();
+      });
+    }
 
     /**
      * 從 Apps Script 後端讀取網頁主內容與事件 (透過 fetch() API)
@@ -874,6 +1581,12 @@
         })
         .then(response => {
           if (response.success) {
+            // 存入全域變數以供編輯器面板使用
+            gConfig = response.config;
+            gEvents = response.events;
+            gCalendars = response.calendars || [];
+            currentSelectedMonth = response.activeMonth;
+            
             renderPageDetails(response.config);
             
             // 處理月份下拉選單 (只有管理員可以看到所有月份，一般人看 Active)
@@ -1372,6 +2085,404 @@
     function findEventForDate(dateStr, events) {
       if (!dateStr || !events) return null;
       return events.find(e => dateStr >= e.startDate && dateStr <= e.endDate) || null;
+    }
+
+    /* ==========================================================================
+       後端管理系統 JS 控制邏輯
+       ========================================================================== */
+    /**
+     * 開啟或關閉後台控制面板
+     */
+    function toggleAdminPanel(show) {
+      const overlay = document.getElementById('admin-panel-overlay');
+      overlay.style.display = show ? 'flex' : 'none';
+      if (show) {
+        populateAdminConfigForm();
+        populateAdminCalendarSelector();
+        switchAdminTab(null, 'tab-general');
+      }
+    }
+
+    /**
+     * 切換後台分頁 (Tabs)
+     */
+    function switchAdminTab(event, tabId) {
+      // 1. 隱藏所有分頁內容
+      const contents = document.querySelectorAll('.admin-tab-content');
+      contents.forEach(c => c.classList.remove('active'));
+      
+      // 2. 取消所有分頁按鈕的 active 樣式
+      const buttons = document.querySelectorAll('.admin-tab-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      
+      // 3. 顯示選定分頁與按鈕
+      document.getElementById(tabId).classList.add('active');
+      if (event) {
+        event.target.classList.add('active');
+      } else {
+        const btnGeneral = buttons[0];
+        const btnCalendar = buttons[1];
+        const btnLogs = buttons[2];
+        if (tabId === 'tab-general') btnGeneral.classList.add('active');
+        if (tabId === 'tab-calendar') btnCalendar.classList.add('active');
+        if (tabId === 'tab-logs') btnLogs.classList.add('active');
+      }
+      
+      // 4. 若切換至學員紀錄，自動重新載入
+      if (tabId === 'tab-logs') {
+        fetchAdminUploadLogs();
+      }
+    }
+
+    /**
+     * 將目前的網頁文字設定值寫入至後台表單中
+     */
+    function populateAdminConfigForm() {
+      if (!gConfig) return;
+      document.getElementById('edit-course-code').value = gConfig.course_code || '';
+      document.getElementById('edit-course-name').value = gConfig.course_name || '';
+      document.getElementById('edit-course-outline').value = gConfig.course_outline || '';
+      document.getElementById('edit-class-date').value = gConfig.class_date || '';
+      document.getElementById('edit-class-time').value = gConfig.class_time || '';
+      document.getElementById('edit-sales-drill').value = gConfig.sales_drill || '';
+      document.getElementById('edit-homework').value = gConfig.homework || '';
+      document.getElementById('edit-participants').value = gConfig.participants || '';
+      document.getElementById('edit-remarks').value = gConfig.remarks || '';
+      document.getElementById('edit-location').value = gConfig.location || '';
+      document.getElementById('edit-reg-text').value = gConfig.registration_text || '';
+      document.getElementById('edit-reg-url').value = gConfig.registration_url || '';
+      document.getElementById('edit-reg-l1-l3').value = gConfig.reg_l1_l3 || '';
+      document.getElementById('edit-notices').value = gConfig.notices || '';
+      document.getElementById('edit-contact-info').value = gConfig.contact_info || '';
+      document.getElementById('edit-admin-password').value = ''; // 密碼變更預設空白
+    }
+
+    /**
+     * 提交並儲存基本網頁文字
+     */
+    function saveGeneralConfig(event) {
+      event.preventDefault();
+      const pwd = sessionStorage.getItem('admin_password');
+      const btnSave = document.getElementById('btn-save-general');
+      btnSave.disabled = true;
+      btnSave.innerText = '儲存中...';
+      
+      const configData = {
+        course_code: document.getElementById('edit-course-code').value,
+        course_name: document.getElementById('edit-course-name').value,
+        course_outline: document.getElementById('edit-course-outline').value,
+        class_date: document.getElementById('edit-class-date').value,
+        class_time: document.getElementById('edit-class-time').value,
+        sales_drill: document.getElementById('edit-sales-drill').value,
+        homework: document.getElementById('edit-homework').value,
+        participants: document.getElementById('edit-participants').value,
+        remarks: document.getElementById('edit-remarks').value,
+        location: document.getElementById('edit-location').value,
+        registration_text: document.getElementById('edit-reg-text').value,
+        registration_url: document.getElementById('edit-reg-url').value,
+        reg_l1_l3: document.getElementById('edit-reg-l1-l3').value,
+        notices: document.getElementById('edit-notices').value,
+        contact_info: document.getElementById('edit-contact-info').value
+      };
+      
+      const newPassword = document.getElementById('edit-admin-password').value;
+      if (newPassword.trim() !== '') {
+        configData.admin_password = newPassword.trim();
+      }
+      
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'saveConfig',
+          password: pwd,
+          configData: configData
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          alert('基本設定儲存成功！');
+          if (newPassword.trim() !== '') {
+            sessionStorage.setItem('admin_password', newPassword.trim());
+          }
+          location.reload();
+        } else {
+          alert('儲存失敗：' + res.error);
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存網頁文字';
+        }
+      })
+      .catch(err => {
+        alert('儲存失敗，連線異常：' + err.toString());
+        btnSave.disabled = false;
+        btnSave.innerText = '儲存網頁文字';
+      });
+    }
+
+    /**
+     * 初始化行程分頁中的月份選單
+     */
+    function populateAdminCalendarSelector() {
+      const select = document.getElementById('admin-select-month');
+      select.innerHTML = '';
+      
+      gCalendars.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.yearMonth;
+        opt.innerText = formatYearMonthZH(m.yearMonth) + (m.status === 'Archived' ? ' (已封存)' : '');
+        if (m.yearMonth === currentSelectedMonth) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+      
+      loadAdminEvents();
+      renderAdminMonthsGrid();
+    }
+
+    /**
+     * 讀取並渲染選定月份於後台編輯表格中
+     */
+    function loadAdminEvents() {
+      const month = document.getElementById('admin-select-month').value;
+      const listContainer = document.getElementById('admin-events-list');
+      listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">載入中...</td></tr>';
+      
+      fetch(`${API_URL}?action=getPageData&admin=true&month=${month}`)
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          renderAdminEventsTable(res.events);
+        } else {
+          listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 15px;">載入失敗: ${res.error}</td></tr>`;
+        }
+      })
+      .catch(err => {
+        listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 15px;">連線異常: ${err.toString()}</td></tr>`;
+      });
+    }
+
+    /**
+     * 渲染後台事件編輯表格
+     */
+    function renderAdminEventsTable(events) {
+      const listContainer = document.getElementById('admin-events-list');
+      listContainer.innerHTML = '';
+      
+      if (!events || events.length === 0) {
+        addEventRow();
+        return;
+      }
+      
+      events.forEach(evt => {
+        addEventRow(evt.startDate, evt.endDate, evt.name, evt.color);
+      });
+    }
+
+    /**
+     * 新增一列日曆事件
+     */
+    function addEventRow(startDate = '', endDate = '', name = '', color = '#e1e1e1') {
+      const listContainer = document.getElementById('admin-events-list');
+      const tr = document.createElement('tr');
+      tr.className = 'event-edit-row';
+      
+      tr.innerHTML = `
+        <td><input type="date" class="edit-event-start" value="${startDate}" required></td>
+        <td><input type="date" class="edit-event-end" value="${endDate}" required></td>
+        <td><input type="text" class="edit-event-name" value="${name}" placeholder="請輸入課程/事件名稱" required></td>
+        <td><input type="color" class="edit-event-color" value="${color}" style="width: 50px; height: 30px; padding: 2px;"></td>
+        <td><button type="button" class="btn-delete-row" onclick="deleteEventRow(this)">刪除</button></td>
+      `;
+      listContainer.appendChild(tr);
+    }
+    
+    /**
+     * 刪除一列日曆事件
+     */
+    function deleteEventRow(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+      const listContainer = document.getElementById('admin-events-list');
+      if (listContainer.children.length === 0) {
+        addEventRow();
+      }
+    }
+
+    /**
+     * 渲染歷史月份管理格表
+     */
+    function renderAdminMonthsGrid() {
+      const grid = document.getElementById('admin-months-grid');
+      grid.innerHTML = '';
+      
+      gCalendars.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'month-status-card';
+        card.dataset.ym = m.yearMonth;
+        
+        card.innerHTML = `
+          <span class="month-status-name">${formatYearMonthZH(m.yearMonth)}</span>
+          <select class="month-status-select" onchange="updateCalendarStatusLocal(this, '${m.yearMonth}')">
+            <option value="Active" ${m.status === 'Active' ? 'selected' : ''}>Active (啟用)</option>
+            <option value="Archived" ${m.status === 'Archived' ? 'selected' : ''}>Archived (封存)</option>
+          </select>
+        `;
+        grid.appendChild(card);
+      });
+    }
+    
+    /**
+     * 變更本地月份封存狀態 (尚未儲存至 Sheet)
+     */
+    function updateCalendarStatusLocal(selectEl, ym) {
+      const m = gCalendars.find(item => item.yearMonth === ym);
+      if (m) {
+        m.status = selectEl.value;
+      }
+    }
+
+    /**
+     * 一併儲存行程事件與封存狀態設定
+     */
+    async function saveAdminCalendarData() {
+      const pwd = sessionStorage.getItem('admin_password');
+      const month = document.getElementById('admin-select-month').value;
+      
+      // 1. 整理行程資料
+      const rows = document.querySelectorAll('.event-edit-row');
+      const eventsData = [];
+      let hasError = false;
+      
+      rows.forEach(r => {
+        const start = r.querySelector('.edit-event-start').value;
+        const end = r.querySelector('.edit-event-end').value;
+        const name = r.querySelector('.edit-event-name').value.trim();
+        const color = r.querySelector('.edit-event-color').value;
+        
+        // 若為全空列則跳過
+        if (!start && !end && !name) {
+          return;
+        }
+        
+        if (!start || !end || !name) {
+          alert('行程填寫不完整，請填妥開始/結束日期與事件名稱！');
+          hasError = true;
+          return;
+        }
+        
+        if (start > end) {
+          alert(`開始日期 (${start}) 不能晚於結束日期 (${end})！`);
+          hasError = true;
+          return;
+        }
+        
+        eventsData.push({
+          startDate: start,
+          endDate: end,
+          name: name,
+          color: color
+        });
+      });
+      
+      if (hasError) return;
+      
+      // 2. 整理月份狀態
+      const calendarsData = gCalendars.map(m => ({
+        yearMonth: m.yearMonth,
+        status: m.status
+      }));
+      
+      try {
+        // 儲存事件
+        const evResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveEvents',
+            password: pwd,
+            yearMonth: month,
+            eventsData: eventsData
+          })
+        });
+        const evResult = await evResponse.json();
+        
+        // 儲存狀態
+        const calResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveCalendars',
+            password: pwd,
+            calendarsData: calendarsData
+          })
+        });
+        const calResult = await calResponse.json();
+        
+        if (evResult.success && calResult.success) {
+          alert('日曆行程與歷史月份狀態儲存成功！');
+          location.reload();
+        } else {
+          alert(`儲存失敗！\n日曆儲存: ${evResult.error || '成功'}\n狀態儲存: ${calResult.error || '成功'}`);
+        }
+      } catch (err) {
+        alert('儲存過程中發生連線異常：' + err.toString());
+      }
+    }
+
+    /**
+     * 向後端 API 取得學生繳交紀錄
+     */
+    function fetchAdminUploadLogs() {
+      const pwd = sessionStorage.getItem('admin_password');
+      const listContainer = document.getElementById('admin-logs-list');
+      listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">載入中...</td></tr>';
+      
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'getUploadLogs',
+          password: pwd
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          renderAdminLogs(res.logs);
+        } else {
+          listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 30px;">載入失敗: ${res.error}</td></tr>`;
+        }
+      })
+      .catch(err => {
+        listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 30px;">連線異常: ${err.toString()}</td></tr>`;
+      });
+    }
+
+    /**
+     * 渲染後台學員作業紀錄表格
+     */
+    function renderAdminLogs(logs) {
+      const listContainer = document.getElementById('admin-logs-list');
+      listContainer.innerHTML = '';
+      
+      if (!logs || logs.length === 0) {
+        listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">目前尚無學員作業繳交紀錄</td></tr>';
+        return;
+      }
+      
+      logs.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${l.timestamp}</td>
+          <td style="font-weight: 500;">${l.studentName}</td>
+          <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${l.fileName}</td>
+          <td><a href="${l.fileUrl}" target="_blank" class="link-table">下載檔案 ↗</a></td>
+          <td><a href="${l.folderUrl}" target="_blank" class="link-table">學員資料夾 ↗</a></td>
+        `;
+        listContainer.appendChild(tr);
+      });
     }
   </script>
 </body>
