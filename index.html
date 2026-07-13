@@ -1365,6 +1365,7 @@
           <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'tab-general')">課程詳細內容</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-location')">上課地點設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-calendar')">日曆行程管理</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-notice')">注意事項設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-system')">聯絡與安全設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
           <div style="flex-grow: 1;"></div>
@@ -1446,13 +1447,8 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="edit-notices">其他重要注意事項 (每行一項)</label>
-                <textarea id="edit-notices" rows="4"></textarea>
-              </div>
-              
               <div class="admin-footer-actions">
-                <button type="submit" class="btn btn-primary" id="btn-save-general">儲存課程與注意事項</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-general">儲存課程詳細內容</button>
               </div>
             </form>
           </div>
@@ -1477,6 +1473,20 @@
               
               <div class="admin-footer-actions">
                 <button type="submit" class="btn btn-primary" id="btn-save-location">儲存地點設定</button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Tab 1.7: 注意事項設定 -->
+          <div class="admin-tab-content" id="tab-notice">
+            <div class="admin-section-title">其他重要注意事項設定</div>
+            <form id="form-notice-config" onsubmit="saveNoticeConfig(event)">
+              <div class="form-group">
+                <label for="edit-notices">其他重要注意事項 (每行一項)</label>
+                <textarea id="edit-notices" rows="6" class="form-input" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white; font-family: inherit; line-height: 1.5;"></textarea>
+              </div>
+              <div class="admin-footer-actions">
+                <button type="submit" id="btn-save-notice" class="btn btn-primary">儲存注意事項</button>
               </div>
             </form>
           </div>
@@ -2589,7 +2599,7 @@
       
       if (hasError) {
         btnSave.disabled = false;
-        btnSave.innerText = '儲存課程與注意事項';
+        btnSave.innerText = '儲存課程詳細內容';
         return;
       }
       
@@ -2606,7 +2616,35 @@
         });
         const courseResult = await courseResponse.json();
         
-        // B. 儲存全域 WebConfig 文字資料
+        if (courseResult.success) {
+          alert('課程詳細內容儲存成功！');
+          // 重新整理頁面資料
+          loadPageContent();
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存課程詳細內容';
+        } else {
+          alert(`儲存失敗！\n錯誤: ${courseResult.error || '未知錯誤'}`);
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存課程詳細內容';
+        }
+      } catch (err) {
+        alert('儲存過程中發生連線異常：' + err.toString());
+        btnSave.disabled = false;
+        btnSave.innerText = '儲存課程詳細內容';
+      }
+    }
+
+    /**
+     * 提交並儲存注意事項設定
+     */
+    async function saveNoticeConfig(event) {
+      event.preventDefault();
+      const pwd = sessionStorage.getItem('admin_password');
+      const btnSave = document.getElementById('btn-save-notice');
+      btnSave.disabled = true;
+      btnSave.innerText = '儲存中...';
+      
+      try {
         const globalData = {
           notices: document.getElementById('edit-notices').value
         };
@@ -2622,21 +2660,20 @@
         });
         const configResult = await configResponse.json();
         
-        if (courseResult.success && configResult.success) {
-          alert('課程與注意事項儲存成功！');
-          // 重新整理頁面資料
+        if (configResult.success) {
+          alert('注意事項儲存成功！');
           loadPageContent();
           btnSave.disabled = false;
-          btnSave.innerText = '儲存課程與注意事項';
+          btnSave.innerText = '儲存注意事項';
         } else {
-          alert(`儲存失敗！\n課程儲存: ${courseResult.error || '成功'}\n設定儲存: ${configResult.error || '成功'}`);
+          alert(`儲存失敗！\n錯誤: ${configResult.error || '未知錯誤'}`);
           btnSave.disabled = false;
-          btnSave.innerText = '儲存課程與注意事項';
+          btnSave.innerText = '儲存注意事項';
         }
       } catch (err) {
         alert('儲存過程中發生連線異常：' + err.toString());
         btnSave.disabled = false;
-        btnSave.innerText = '儲存課程與注意事項';
+        btnSave.innerText = '儲存注意事項';
       }
     }
 

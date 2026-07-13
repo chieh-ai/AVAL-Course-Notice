@@ -554,13 +554,15 @@ function initDatabase() {
     configSheet.autoResizeColumns(1, 3);
   }
   
-  // 5.5. 移除多餘/沒用到的 WebConfig 欄位 (包括 obsolete 的線上報名欄位)
+  // 5.5. 移除多餘/沒用到的 WebConfig 欄位 (包括 obsolete 的線上報名與舊版課程詳細欄位)
   var configLastRow = configSheet.getLastRow();
   if (configLastRow > 1) {
     var configValues = configSheet.getRange(1, 1, configLastRow, 1).getValues();
     for (var r = configLastRow; r >= 2; r--) {
       var k = configValues[r-1][0];
-      if (k === "calendar_start_month" || k === "calendar_end_month" || k === "registration_text" || k === "registration_url" || k === "reg_l1_l3") {
+      if (k === "calendar_start_month" || k === "calendar_end_month" || k === "registration_text" || k === "registration_url" || k === "reg_l1_l3" ||
+          k === "course_code" || k === "course_name" || k === "course_outline" || k === "class_date" || k === "class_time" || k === "participants" ||
+          k === "sales_drill" || k === "homework" || k === "remarks") {
         configSheet.deleteRow(r);
       }
     }
