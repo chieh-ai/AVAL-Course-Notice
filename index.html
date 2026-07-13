@@ -869,6 +869,7 @@
     .form-group input[type="text"],
     .form-group input[type="url"],
     .form-group input[type="password"],
+    .form-group input[type="date"],
     .form-group textarea,
     .form-group select {
       width: 100%;
@@ -1096,8 +1097,7 @@
   </header>
 
   <div class="container" style="margin-top: 40px;">
-    <!-- 2. 主標題區 -->
-    <p class="page-subtitle">暐固科技數位轉型系列課程 &middot; 培訓計畫公告</p>
+    <!-- 2. 主標題區 (移除子標籤) -->
 
     <!-- 3. 主版型 Grid -->
     <div class="grid-layout">
@@ -1296,6 +1296,7 @@
         <!-- 左側導覽頁籤 -->
         <div class="admin-sidebar">
           <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'tab-general')">網頁文字內容</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-location')">上課地點設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-calendar')">日曆行程管理</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
         </div>
@@ -1349,20 +1350,6 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="edit-location">上課地點 (地址)</label>
-                  <input type="text" id="edit-location" required>
-                </div>
-                <div class="form-group">
-                  <label for="edit-location-classroom">上課教室</label>
-                  <input type="text" id="edit-location-classroom">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="edit-location-remarks">上課地點備註</label>
-                <input type="text" id="edit-location-remarks">
-              </div>
-              <div class="form-row">
-                <div class="form-group">
                   <label for="edit-reg-text">報名說明文字</label>
                   <input type="text" id="edit-reg-text" required>
                 </div>
@@ -1390,6 +1377,30 @@
               
               <div class="admin-footer-actions">
                 <button type="submit" class="btn btn-primary" id="btn-save-general">儲存網頁文字</button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Tab 1.5: 上課地點設定 -->
+          <div class="admin-tab-content" id="tab-location">
+            <form id="form-location-config" onsubmit="saveLocationConfig(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-location">上課地點 (地址)</label>
+                  <input type="text" id="edit-location" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit-location-classroom">上課教室</label>
+                  <input type="text" id="edit-location-classroom">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-location-remarks">上課地點備註</label>
+                <textarea id="edit-location-remarks" rows="4"></textarea>
+              </div>
+              
+              <div class="admin-footer-actions">
+                <button type="submit" class="btn btn-primary" id="btn-save-location">儲存地點設定</button>
               </div>
             </form>
           </div>
@@ -2243,9 +2254,11 @@
         event.target.classList.add('active');
       } else {
         const btnGeneral = buttons[0];
-        const btnCalendar = buttons[1];
-        const btnLogs = buttons[2];
+        const btnLocation = buttons[1];
+        const btnCalendar = buttons[2];
+        const btnLogs = buttons[3];
         if (tabId === 'tab-general') btnGeneral.classList.add('active');
+        if (tabId === 'tab-location') btnLocation.classList.add('active');
         if (tabId === 'tab-calendar') btnCalendar.classList.add('active');
         if (tabId === 'tab-logs') btnLogs.classList.add('active');
       }
@@ -2301,9 +2314,6 @@
         homework: document.getElementById('edit-homework').value,
         participants: document.getElementById('edit-participants').value,
         remarks: document.getElementById('edit-remarks').value,
-        location: document.getElementById('edit-location').value,
-        location_classroom: document.getElementById('edit-location-classroom').value,
-        location_remarks: document.getElementById('edit-location-remarks').value,
         registration_text: document.getElementById('edit-reg-text').value,
         registration_url: document.getElementById('edit-reg-url').value,
         reg_l1_l3: document.getElementById('edit-reg-l1-l3').value,
@@ -2343,6 +2353,49 @@
         alert('儲存失敗，連線異常：' + err.toString());
         btnSave.disabled = false;
         btnSave.innerText = '儲存網頁文字';
+      });
+    }
+
+    /**
+     * 提交並儲存上課地點設定
+     */
+    function saveLocationConfig(event) {
+      event.preventDefault();
+      const pwd = sessionStorage.getItem('admin_password');
+      const btnSave = document.getElementById('btn-save-location');
+      btnSave.disabled = true;
+      btnSave.innerText = '儲存中...';
+      
+      const configData = {
+        location: document.getElementById('edit-location').value,
+        location_classroom: document.getElementById('edit-location-classroom').value,
+        location_remarks: document.getElementById('edit-location-remarks').value
+      };
+      
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'saveConfig',
+          password: pwd,
+          configData: configData
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          alert('上課地點設定儲存成功！');
+          location.reload();
+        } else {
+          alert('儲存失敗：' + res.error);
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存地點設定';
+        }
+      })
+      .catch(err => {
+        alert('儲存失敗，連線異常：' + err.toString());
+        btnSave.disabled = false;
+        btnSave.innerText = '儲存地點設定';
       });
     }
 

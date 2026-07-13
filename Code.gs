@@ -138,7 +138,12 @@ function getPageData(isAdmin, selectedMonth) {
   for (var i = 1; i < configRows.length; i++) {
     var key = configRows[i][0];
     if (key !== "admin_password") {
-      config[key] = configRows[i][1];
+      var val = configRows[i][1];
+      if (val instanceof Date) {
+        config[key] = formatDateString(val);
+      } else {
+        config[key] = val;
+      }
     }
   }
   
