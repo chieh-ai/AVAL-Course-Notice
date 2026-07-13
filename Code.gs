@@ -331,14 +331,14 @@ function uploadFile(studentName, fileName, base64Data, mimeType, workType) {
   studentName = studentName.trim();
   var parentFolder = DriveApp.getFolderById(UPLOAD_FOLDER_ID);
   
-  // 搜尋有無同名的學生資料夾
+  // 以「上傳日期」+「繳交類型」+「中文全名」命名子資料夾
+  var subFolderName = formatDateString(new Date()) + "_" + (workType || "課後作業") + "_" + studentName;
   var studentFolder;
-  var subFolders = parentFolder.getFoldersByName(studentName);
+  var subFolders = parentFolder.getFoldersByName(subFolderName);
   if (subFolders.hasNext()) {
     studentFolder = subFolders.next();
   } else {
-    // 建立學生專屬資料夾
-    studentFolder = parentFolder.createFolder(studentName);
+    studentFolder = parentFolder.createFolder(subFolderName);
   }
   
   // 解碼並建立檔案

@@ -645,12 +645,7 @@
       color: var(--accent-red);
     }
 
-    #contact-section {
-      background-color: rgba(255, 255, 255, 0.7) !important;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-    }
+
 
     .fixed-footer {
       position: fixed;
@@ -1326,15 +1321,7 @@
           <ol class="notice-list" id="notices"></ol>
         </section>
 
-        <!-- 區塊：課程相關訊息聯絡人 -->
-        <section id="contact-section" class="card">
-          <div class="card-title">聯絡我們</div>
-          <div class="contact-item">
-            <span class="contact-company" id="contact-name-label"></span>
-            <a href="" id="contact-phone-href" class="contact-phone">電話：<span id="contact-phone-text"></span></a>
-            <a href="" id="contact-email-href" class="contact-email">電郵：<span id="contact-email-text"></span></a>
-          </div>
-        </section>
+
 
       </div>
 
@@ -1378,6 +1365,7 @@
           <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'tab-general')">課程詳細內容</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-location')">上課地點設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-calendar')">日曆行程管理</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-system')">聯絡與安全設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
           <div style="flex-grow: 1;"></div>
           <button class="admin-logout-btn" onclick="logoutAdmin()">🚪 安全登出</button>
@@ -1462,17 +1450,9 @@
                 <label for="edit-notices">其他重要注意事項 (每行一項)</label>
                 <textarea id="edit-notices" rows="4"></textarea>
               </div>
-              <div class="form-group">
-                <label for="edit-contact-info">聯絡資訊 (格式：公司 部門 聯絡人 | 電話 | 信箱)</label>
-                <input type="text" id="edit-contact-info" required>
-              </div>
-              <div class="form-group">
-                <label for="edit-admin-password">管理密碼變更 (留空代表不變更)</label>
-                <input type="password" id="edit-admin-password" placeholder="請輸入新密碼">
-              </div>
               
               <div class="admin-footer-actions">
-                <button type="submit" class="btn btn-primary" id="btn-save-general">儲存網頁文字</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-general">儲存課程與注意事項</button>
               </div>
             </form>
           </div>
@@ -1559,6 +1539,7 @@
                   <tr>
                     <th>時間</th>
                     <th>學員姓名</th>
+                    <th>練習/作業類型</th>
                     <th>檔名</th>
                     <th>檔案下載</th>
                     <th>學員雲端資料夾</th>
@@ -1566,11 +1547,29 @@
                 </thead>
                 <tbody id="admin-logs-list">
                   <tr>
-                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">載入中...</td>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">載入中...</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+          </div>
+          
+          <!-- Tab 5: 聯絡與安全設定 -->
+          <div class="admin-tab-content" id="tab-system">
+            <div class="admin-section-title">聯絡與安全設定</div>
+            <form id="form-system-config" onsubmit="saveSystemConfig(event)">
+              <div class="form-group">
+                <label for="edit-contact-info">聯絡資訊 (格式：公司 部門 聯絡人 | 電話 | 信箱)</label>
+                <input type="text" id="edit-contact-info" class="form-input" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white;">
+              </div>
+              <div class="form-group">
+                <label for="edit-admin-password">管理密碼變更 (留空代表不變更)</label>
+                <input type="password" id="edit-admin-password" class="form-input" placeholder="請輸入新密碼" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white;">
+              </div>
+              <div class="admin-footer-actions">
+                <button type="submit" id="btn-save-system" class="btn btn-primary">儲存聯絡與安全</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -1881,23 +1880,16 @@
       
       // 聯絡人
       const contactRaw = config.contact_info || '';
-      const parts = contactRaw.split('|');
-      if (parts.length >= 3) {
-        const name = parts[0].trim();
-        const phone = parts[1].trim();
-        const email = parts[2].trim();
-        
-        document.getElementById('contact-name-label').innerText = name;
-        document.getElementById('contact-phone-text').innerText = phone;
-        document.getElementById('contact-phone-href').href = `tel:${phone}`;
-        
-        document.getElementById('contact-email-text').innerText = email;
-        document.getElementById('contact-email-href').href = `mailto:${email}`;
-        
-        // 渲染到最下方的固定列中
-        const footerContactEl = document.getElementById('footer-contact-info');
-        if (footerContactEl) {
+      const footerContactEl = document.getElementById('footer-contact-info');
+      if (footerContactEl) {
+        const parts = contactRaw.split('|');
+        if (parts.length >= 3) {
+          const name = parts[0].trim();
+          const phone = parts[1].trim();
+          const email = parts[2].trim();
           footerContactEl.innerHTML = `<strong>${name}</strong> &nbsp;|&nbsp; 📞 電話：<a href="tel:${phone}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${phone}</a> &nbsp;|&nbsp; ✉️ 信箱：<a href="mailto:${email}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${email}</a>`;
+        } else {
+          footerContactEl.innerText = contactRaw;
         }
       }
     }
@@ -2523,14 +2515,12 @@
       if (event) {
         event.target.classList.add('active');
       } else {
-        const btnGeneral = buttons[0];
-        const btnLocation = buttons[1];
-        const btnCalendar = buttons[2];
-        const btnLogs = buttons[3];
-        if (tabId === 'tab-general') btnGeneral.classList.add('active');
-        if (tabId === 'tab-location') btnLocation.classList.add('active');
-        if (tabId === 'tab-calendar') btnCalendar.classList.add('active');
-        if (tabId === 'tab-logs') btnLogs.classList.add('active');
+        buttons.forEach(b => {
+          const onclickAttr = b.getAttribute('onclick');
+          if (onclickAttr && onclickAttr.includes(`'${tabId}'`)) {
+            b.classList.add('active');
+          }
+        });
       }
       
       // 4. 若切換至學員紀錄，自動重新載入
@@ -2599,7 +2589,7 @@
       
       if (hasError) {
         btnSave.disabled = false;
-        btnSave.innerText = '儲存課程與文字';
+        btnSave.innerText = '儲存課程與注意事項';
         return;
       }
       
@@ -2618,7 +2608,50 @@
         
         // B. 儲存全域 WebConfig 文字資料
         const globalData = {
-          notices: document.getElementById('edit-notices').value,
+          notices: document.getElementById('edit-notices').value
+        };
+        
+        const configResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveConfig',
+            password: pwd,
+            configData: globalData
+          })
+        });
+        const configResult = await configResponse.json();
+        
+        if (courseResult.success && configResult.success) {
+          alert('課程與注意事項儲存成功！');
+          // 重新整理頁面資料
+          loadPageContent();
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存課程與注意事項';
+        } else {
+          alert(`儲存失敗！\n課程儲存: ${courseResult.error || '成功'}\n設定儲存: ${configResult.error || '成功'}`);
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存課程與注意事項';
+        }
+      } catch (err) {
+        alert('儲存過程中發生連線異常：' + err.toString());
+        btnSave.disabled = false;
+        btnSave.innerText = '儲存課程與注意事項';
+      }
+    }
+
+    /**
+     * 提交並儲存聯絡與安全設定
+     */
+    async function saveSystemConfig(event) {
+      event.preventDefault();
+      const pwd = sessionStorage.getItem('admin_password');
+      const btnSave = document.getElementById('btn-save-system');
+      btnSave.disabled = true;
+      btnSave.innerText = '儲存中...';
+      
+      try {
+        const globalData = {
           contact_info: document.getElementById('edit-contact-info').value
         };
         
@@ -2638,24 +2671,25 @@
         });
         const configResult = await configResponse.json();
         
-        if (courseResult.success && configResult.success) {
-          alert('課程內容與設定儲存成功！');
+        if (configResult.success) {
+          alert('聯絡與安全設定儲存成功！');
           if (newPassword.trim() !== '') {
             sessionStorage.setItem('admin_password', newPassword.trim());
           }
           // 重新整理頁面資料
           loadPageContent();
+          document.getElementById('edit-admin-password').value = '';
           btnSave.disabled = false;
-          btnSave.innerText = '儲存課程與文字';
+          btnSave.innerText = '儲存聯絡與安全';
         } else {
-          alert(`儲存失敗！\n課程儲存: ${courseResult.error || '成功'}\n設定儲存: ${configResult.error || '成功'}`);
+          alert(`儲存失敗！\n錯誤: ${configResult.error || '未知錯誤'}`);
           btnSave.disabled = false;
-          btnSave.innerText = '儲存課程與文字';
+          btnSave.innerText = '儲存聯絡與安全';
         }
       } catch (err) {
         alert('儲存過程中發生連線異常：' + err.toString());
         btnSave.disabled = false;
-        btnSave.innerText = '儲存課程與文字';
+        btnSave.innerText = '儲存聯絡與安全';
       }
     }
 
