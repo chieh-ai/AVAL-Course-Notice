@@ -42,7 +42,14 @@ function doGet(e) {
     else if (action === "debugConfig") {
       var ss = getSpreadsheet();
       var sheet = ss.getSheetByName("WebConfig");
-      responseData = { success: true, rows: sheet.getDataRange().getValues() };
+      var courseSheet = ss.getSheetByName("CourseDetails");
+      var courseRows = courseSheet ? courseSheet.getDataRange().getValues() : null;
+      responseData = { 
+        success: true, 
+        rows: sheet.getDataRange().getValues(),
+        sheets: ss.getSheets().map(function(s) { return s.getName(); }),
+        courseRows: courseRows
+      };
     }
     else {
       responseData = { 
@@ -91,6 +98,13 @@ function doPost(e) {
         responseData = { success: false, error: "密碼驗證失敗，無管理權限。" };
       } else {
         responseData = saveWebConfig(postData.configData);
+      }
+    }
+    else if (action === "saveCourses") {
+      if (!checkAdminAuth(postData.password)) {
+        responseData = { success: false, error: "密碼驗證失敗，無管理權限。" };
+      } else {
+        responseData = saveCourses(postData.coursesData);
       }
     }
     else if (action === "saveEvents") {
@@ -247,12 +261,33 @@ function getPageData(isAdmin, selectedMonth) {
     }
   }
   
+  // 4. 讀取所有課程詳細內容 (CourseDetails)
+  var courseSheet = ss.getSheetByName("CourseDetails");
+  var courses = [];
+  if (courseSheet) {
+    var courseRows = courseSheet.getDataRange().getValues();
+    for (var i = 1; i < courseRows.length; i++) {
+      courses.push({
+        code: courseRows[i][0] ? String(courseRows[i][0]).trim() : "",
+        name: courseRows[i][1] ? String(courseRows[i][1]).trim() : "",
+        outline: courseRows[i][2] || "",
+        classDate: courseRows[i][3] || "",
+        classTime: courseRows[i][4] || "",
+        salesDrill: courseRows[i][5] || "",
+        homework: courseRows[i][6] || "",
+        participants: courseRows[i][7] || "",
+        remarks: courseRows[i][8] || ""
+      });
+    }
+  }
+  
   return {
     success: true,
     config: config,
     calendars: calendars,
     activeMonth: targetMonth,
-    events: events
+    events: events,
+    courses: courses
   };
 }
 
@@ -517,6 +552,66 @@ function initDatabase() {
       calEventsSheet.getRange(1, 1, newEventValues.length, eventValues[0].length).setValues(newEventValues);
     }
   }
+  
+  // 7. 建立 CourseDetails (課程詳細內容) 並轉移資料
+  var courseSheet = ss.getSheetByName("CourseDetails");
+  var rebuildCourses = false;
+  if (!courseSheet) {
+    courseSheet = ss.insertSheet("CourseDetails");
+    rebuildCourses = true;
+  } else {
+    var courseRows = courseSheet.getDataRange().getValues();
+    var codes = courseRows.slice(1).map(function(r) { return r[0]; });
+    if (codes.indexOf("AF01") === -1 || codes.filter(function(c) { return c === "AC02"; }).length > 1) {
+      rebuildCourses = true;
+    }
+  }
+  
+  if (rebuildCourses) {
+    courseSheet.clearContents();
+    
+    var newValues = [
+      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks"],
+      [
+        "AF01",
+        "AVAL Level 0 for Sales Training",
+        "AVAL 課程簡介與訓練目標\n經銷商服務規範與流程說明\n門市銷售基本觀念演練\n產品基礎功能與介紹\n基礎銷售技巧演練",
+        "06/29（一）至 07/03（五）",
+        "09:30 至 17:00（第一天 10:00 開始）",
+        "◎",
+        "◎",
+        "富鴻 雲德睿\n秉皇 胡雅恩",
+        "請自備環保杯，教室內禁止飲食"
+      ],
+      [
+        "AC02",
+        "L2 - Mac Specialist 檢定先修班",
+        "Apple Mac Specialist 檢定目的\n流程與設備環境介紹\n檢定計分方式與相關規範\n情境腳本撰寫\n結構解析、展示技巧\n客戶互動方式\nMac 系列硬體快速展示\nmacOS Tahoe功能與特色補充\nmacOS Tahoe 軟體展示情境\nMac 的生態圈應用\n模擬檢定演練",
+        "07/15（三）至 07/16（四）",
+        "10:00 至 17:00",
+        "◎",
+        "◎",
+        "富鴻 雲德睿\n秉皇 胡雅恩、沈思妤",
+        "① 建議自備 Mac 筆電，並升級至最新版本（macOS Tahoe 26.5）\n② 確認筆電已安裝最新版 iWork（Pages｜Keynote｜Numbers）軟體（或是訂閱 Apple Creator Studio）"
+      ]
+    ];
+    courseSheet.getRange(1, 1, newValues.length, 9).setValues(newValues);
+    courseSheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#f3f3f3");
+    courseSheet.autoResizeColumns(1, 9);
+    
+    // 從 WebConfig 刪除已移轉的課程詳細欄位，以維持 WebConfig 簡潔乾淨
+    var keysToRemove = ["course_code", "course_name", "course_outline", "class_date", "class_time", "sales_drill", "homework", "participants", "remarks"];
+    var lastR = configSheet.getLastRow();
+    if (lastR > 1) {
+      var configVals = configSheet.getRange(1, 1, lastR, 1).getValues();
+      for (var r = lastR; r >= 2; r--) {
+        var key = configVals[r-1][0];
+        if (keysToRemove.indexOf(key) >= 0) {
+          configSheet.deleteRow(r);
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -597,6 +692,46 @@ function saveWebConfig(configData) {
       }
     }
     range.setValues(values);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * 儲存課程詳細內容列表 (CourseDetails)
+ */
+function saveCourses(coursesData) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("CourseDetails");
+    if (!sheet) {
+      sheet = ss.insertSheet("CourseDetails");
+    }
+    sheet.clearContents();
+    
+    var newValues = [
+      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks"]
+    ];
+    
+    for (var i = 0; i < coursesData.length; i++) {
+      var c = coursesData[i];
+      newValues.push([
+        c.code || "",
+        c.name || "",
+        c.outline || "",
+        c.classDate || "",
+        c.classTime || "",
+        c.salesDrill || "",
+        c.homework || "",
+        c.participants || "",
+        c.remarks || ""
+      ]);
+    }
+    
+    sheet.getRange(1, 1, newValues.length, 9).setValues(newValues);
+    sheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#f3f3f3");
+    sheet.autoResizeColumns(1, 9);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.toString() };

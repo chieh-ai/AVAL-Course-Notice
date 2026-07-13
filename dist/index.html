@@ -237,24 +237,43 @@
     }
 
     .calendar-event-cell {
-      color: var(--text-main);
+      color: #ffffff;
       padding: 8px;
       border-radius: 8px;
       transition: var(--transition);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .event-date-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.95);
       margin-bottom: 4px;
     }
 
     .event-name-label {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 700;
       line-height: 1.3;
       word-break: break-all;
+    }
+    
+    .calendar-event-cell {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    .calendar-event-cell:hover {
+      transform: scale(1.02);
+      filter: brightness(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .calendar-event-cell:active {
+      transform: scale(0.98);
+    }
+    .calendar-event-cell.selected-event {
+      outline: 3px solid var(--accent-red);
+      outline-offset: -3px;
+      box-shadow: 0 6px 16px rgba(182, 38, 48, 0.25);
     }
 
     /* ==========================================================================
@@ -841,6 +860,25 @@
       background: rgba(182, 38, 48, 0.08);
       color: var(--accent-red);
     }
+    .admin-logout-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      border: 1px solid #ffcccc;
+      background: #fff5f5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #b62630;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: auto;
+    }
+    .admin-logout-btn:hover {
+      background: #ffe5e5;
+      border-color: #ff9999;
+      color: #901b22;
+    }
     .admin-content {
       flex: 1;
       padding: 30px;
@@ -868,6 +906,7 @@
     .form-group input[type="text"],
     .form-group input[type="url"],
     .form-group input[type="password"],
+    .form-group input[type="date"],
     .form-group textarea,
     .form-group select {
       width: 100%;
@@ -1049,7 +1088,7 @@
       }
       
       .event-name-label {
-        font-size: 10px;
+        font-size: 12px;
       }
 
       .admin-panel-card {
@@ -1095,8 +1134,7 @@
   </header>
 
   <div class="container" style="margin-top: 40px;">
-    <!-- 2. 主標題區 -->
-    <p class="page-subtitle">暐固科技數位轉型系列課程 &middot; 培訓計畫公告</p>
+    <!-- 2. 主標題區 (移除子標籤) -->
 
     <!-- 3. 主版型 Grid -->
     <div class="grid-layout">
@@ -1120,7 +1158,7 @@
         </section>
 
         <!-- 區塊：課程詳細說明 -->
-        <section id="details-section" class="card">
+        <section id="details-section" class="card" style="opacity: 1; transition: opacity 0.25s ease;">
           <div class="card-title">課程詳細說明</div>
           <div id="details-loader">
             <div class="skeleton" style="width: 100%;"></div>
@@ -1141,18 +1179,6 @@
               <td class="detail-value"><ul id="course-outline"></ul></td>
             </tr>
             <tr>
-              <td class="detail-label">上課日期</td>
-              <td class="detail-value" id="class-date"></td>
-            </tr>
-            <tr>
-              <td class="detail-label">上課時間</td>
-              <td class="detail-value" id="class-time"></td>
-            </tr>
-            <tr>
-              <td class="detail-label">參加名單</td>
-              <td class="detail-value"><ul id="participants"></ul></td>
-            </tr>
-            <tr>
               <td class="detail-label">銷售演練</td>
               <td class="detail-value"><span class="badge-icon" id="sales-drill"></span></td>
             </tr>
@@ -1163,6 +1189,18 @@
             <tr>
               <td class="detail-label">備註</td>
               <td class="detail-value"><ul id="remarks"></ul></td>
+            </tr>
+            <tr>
+              <td class="detail-label">上課日期</td>
+              <td class="detail-value" id="class-date"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">上課時間</td>
+              <td class="detail-value" id="class-time"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">參加名單</td>
+              <td class="detail-value"><ul id="participants"></ul></td>
             </tr>
           </table>
         </section>
@@ -1294,16 +1332,30 @@
       <div class="admin-panel-body">
         <!-- 左側導覽頁籤 -->
         <div class="admin-sidebar">
-          <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'tab-general')">網頁文字內容</button>
+          <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'tab-general')">課程詳細內容</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-location')">上課地點設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-calendar')">日曆行程管理</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
+          <div style="flex-grow: 1;"></div>
+          <button class="admin-logout-btn" onclick="logoutAdmin()">🚪 安全登出</button>
         </div>
         
         <!-- 右側內容區 -->
         <div class="admin-content">
-          <!-- Tab 1: 網頁文字內容 -->
+          <!-- Tab 1: 課程詳細內容 -->
           <div class="admin-tab-content active" id="tab-general">
             <form id="form-general-config" onsubmit="saveGeneralConfig(event)">
+              <!-- 課程多筆資料編輯器選擇列 -->
+              <div class="form-row" style="align-items: flex-end; margin-bottom: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;">
+                <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                  <label for="admin-select-course" style="font-weight: 600;">選擇編輯課程：</label>
+                  <select id="admin-select-course" onchange="onAdminSelectCourseChange()"></select>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-primary" onclick="addNewCourse()" style="padding: 10px 14px; font-size: 13px;">＋ 新增課程</button>
+                  <button type="button" class="btn" onclick="deleteCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid #ffcccc; color: #b62630; background: #fff5f5;">🗑️ 刪除此課程</button>
+                </div>
+              </div>
               <div class="form-row">
                 <div class="form-group">
                   <label for="edit-course-code">課程代碼</label>
@@ -1348,20 +1400,6 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="edit-location">上課地點 (地址)</label>
-                  <input type="text" id="edit-location" required>
-                </div>
-                <div class="form-group">
-                  <label for="edit-location-classroom">上課教室</label>
-                  <input type="text" id="edit-location-classroom">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="edit-location-remarks">上課地點備註</label>
-                <input type="text" id="edit-location-remarks">
-              </div>
-              <div class="form-row">
-                <div class="form-group">
                   <label for="edit-reg-text">報名說明文字</label>
                   <input type="text" id="edit-reg-text" required>
                 </div>
@@ -1393,6 +1431,30 @@
             </form>
           </div>
           
+          <!-- Tab 1.5: 上課地點設定 -->
+          <div class="admin-tab-content" id="tab-location">
+            <form id="form-location-config" onsubmit="saveLocationConfig(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-location">上課地點 (地址)</label>
+                  <input type="text" id="edit-location" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit-location-classroom">上課教室</label>
+                  <input type="text" id="edit-location-classroom">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-location-remarks">上課地點備註</label>
+                <textarea id="edit-location-remarks" rows="4"></textarea>
+              </div>
+              
+              <div class="admin-footer-actions">
+                <button type="submit" class="btn btn-primary" id="btn-save-location">儲存地點設定</button>
+              </div>
+            </form>
+          </div>
+          
           <!-- Tab 2: 日曆行程管理 -->
           <div class="admin-tab-content" id="tab-calendar">
             <div class="calendar-admin-header">
@@ -1409,6 +1471,7 @@
                   <tr>
                     <th>開始日期</th>
                     <th>結束日期</th>
+                    <th>課程代碼</th>
                     <th>事件/課程名稱</th>
                     <th>顯示顏色</th>
                     <th>操作</th>
@@ -1478,9 +1541,10 @@
     let availableMonths = [];
     
     // 全域變數：儲存目前載入的後台資料，以便管理面板讀取
-    let gConfig = {}; 
-    let gEvents = []; 
-    let gCalendars = []; 
+     let gConfig = {}; 
+     let gEvents = []; 
+     let gCalendars = []; 
+     let gCourses = []; 
     let currentSelectedMonth = ""; 
     
     // 初始化網頁
@@ -1626,9 +1690,10 @@
             gConfig = response.config;
             gEvents = response.events;
             gCalendars = response.calendars || [];
+            gCourses = response.courses || [];
             currentSelectedMonth = response.activeMonth;
             
-            renderPageDetails(response.config);
+            renderGlobalPageDetails(response.config);
             
             // 處理月份下拉選單 (只有管理員可以看到所有月份，一般人看 Active)
             if (isAdmin && availableMonths.length === 0) {
@@ -1647,11 +1712,31 @@
             }
             
             // 渲染日曆
-            renderCalendar(response.activeMonth, response.events);
+            renderCalendar(response.config.calendar_start_date, response.config.calendar_end_date, response.events);
             
             document.getElementById('calendar-loader').style.display = 'none';
             document.getElementById('details-loader').style.display = 'none';
             document.getElementById('details-table').style.display = 'table';
+            
+            // 決定預設顯示哪個課程的詳細說明
+            let defaultCourseCode = '';
+            if (response.events && response.events.length > 0) {
+              const firstEv = response.events.find(e => e.code);
+              if (firstEv) defaultCourseCode = firstEv.code;
+            }
+            if (!defaultCourseCode && response.courses && response.courses.length > 0) {
+              defaultCourseCode = response.courses[0].code;
+            }
+            if (defaultCourseCode) {
+              selectCourseByCode(defaultCourseCode);
+            }
+            
+            // 重新填入後台表單資料，確保資料與後端最新儲存的一致
+            const adminPwd = sessionStorage.getItem('admin_password');
+            if (adminPwd) {
+              populateAdminConfigForm();
+              populateAdminCalendarSelector();
+            }
           } else {
             alert('載入網頁內容失敗: ' + response.error);
           }
@@ -1721,25 +1806,7 @@
     /**
      * 渲染文字設定
      */
-    function renderPageDetails(config) {
-      const webTitleEl = document.getElementById('web-title');
-      if (webTitleEl) {
-        webTitleEl.innerText = config.course_name || '課程公告';
-      }
-      document.getElementById('course-code').innerText = config.course_code || '';
-      document.getElementById('course-name').innerText = config.course_name || '';
-      document.getElementById('class-date').innerText = config.class_date || '';
-      document.getElementById('class-time').innerText = config.class_time || '';
-      
-      // 銷售演練 & 課後作業
-      setCheckmark(document.getElementById('sales-drill'), config.sales_drill);
-      setCheckmark(document.getElementById('homework'), config.homework);
-      
-      // 列表欄位解析
-      renderList(document.getElementById('course-outline'), config.course_outline);
-      renderList(document.getElementById('participants'), config.participants);
-      renderList(document.getElementById('remarks'), config.remarks);
-      
+    function renderGlobalPageDetails(config) {
       // 報名資訊
       document.getElementById('reg-text').innerText = config.registration_text || '';
       document.getElementById('btn-registration').href = config.registration_url || '#';
@@ -1784,6 +1851,164 @@
         
         document.getElementById('contact-email-text').innerText = email;
         document.getElementById('contact-email-href').href = `mailto:${email}`;
+      }
+    }
+
+    function renderCoursePageDetails(course) {
+      if (!course) return;
+      
+      const webTitleEl = document.getElementById('web-title');
+      if (webTitleEl) {
+        webTitleEl.innerText = course.name || '課程公告';
+      }
+      document.getElementById('course-code').innerText = course.code || '';
+      document.getElementById('course-name').innerText = course.name || '';
+      document.getElementById('class-date').innerText = course.classDate || '';
+      document.getElementById('class-time').innerText = course.classTime || '';
+      
+      // 銷售演練 & 課後作業
+      setCheckmark(document.getElementById('sales-drill'), course.salesDrill);
+      setCheckmark(document.getElementById('homework'), course.homework);
+      
+      // 列表欄位解析
+      renderList(document.getElementById('course-outline'), course.outline);
+      renderList(document.getElementById('participants'), course.participants);
+      renderList(document.getElementById('remarks'), course.remarks);
+      
+      // 添加淡入淡出動畫效果，讓細節切換看起來非常優雅
+      const detailsSection = document.getElementById('details-section');
+      if (detailsSection) {
+        detailsSection.style.opacity = '0';
+        detailsSection.style.transition = 'opacity 0.25s ease';
+        requestAnimationFrame(() => {
+          detailsSection.style.opacity = '1';
+        });
+      }
+    }
+
+    let currentEditingCourseCode = '';
+
+    function populateAdminCourseSelector(selectedCode = '') {
+      const select = document.getElementById('admin-select-course');
+      select.innerHTML = '';
+      
+      if (gCourses.length === 0) {
+        gCourses.push({
+          code: 'NEW-COURSE',
+          name: '新課程',
+          outline: '',
+          classDate: '',
+          classTime: '',
+          salesDrill: '',
+          homework: '',
+          participants: '',
+          remarks: ''
+        });
+      }
+      
+      gCourses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.innerText = `${c.code} - ${c.name}`;
+        if (selectedCode && c.code === selectedCode) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+      
+      if (selectedCode) {
+        currentEditingCourseCode = selectedCode;
+      } else {
+        currentEditingCourseCode = select.value || gCourses[0].code;
+      }
+      
+      loadCourseFields(currentEditingCourseCode);
+    }
+
+    function loadCourseFields(code) {
+      const course = gCourses.find(c => c.code === code);
+      if (!course) return;
+      
+      document.getElementById('edit-course-code').value = course.code || '';
+      document.getElementById('edit-course-name').value = course.name || '';
+      document.getElementById('edit-course-outline').value = course.outline || '';
+      document.getElementById('edit-class-date').value = course.classDate || '';
+      document.getElementById('edit-class-time').value = course.classTime || '';
+      document.getElementById('edit-sales-drill').value = course.salesDrill || '';
+      document.getElementById('edit-homework').value = course.homework || '';
+      document.getElementById('edit-participants').value = course.participants || '';
+      document.getElementById('edit-remarks').value = course.remarks || '';
+    }
+
+    function onAdminSelectCourseChange() {
+      saveCurrentCourseToMemory();
+      const select = document.getElementById('admin-select-course');
+      currentEditingCourseCode = select.value;
+      loadCourseFields(currentEditingCourseCode);
+    }
+
+    function saveCurrentCourseToMemory() {
+      if (!currentEditingCourseCode) return;
+      const course = gCourses.find(c => c.code === currentEditingCourseCode);
+      if (course) {
+        const newCode = document.getElementById('edit-course-code').value.trim();
+        course.code = newCode;
+        course.name = document.getElementById('edit-course-name').value.trim();
+        course.outline = document.getElementById('edit-course-outline').value;
+        course.classDate = document.getElementById('edit-class-date').value;
+        course.classTime = document.getElementById('edit-class-time').value;
+        course.salesDrill = document.getElementById('edit-sales-drill').value;
+        course.homework = document.getElementById('edit-homework').value;
+        course.participants = document.getElementById('edit-participants').value;
+        course.remarks = document.getElementById('edit-remarks').value;
+        
+        if (newCode && newCode !== currentEditingCourseCode) {
+          currentEditingCourseCode = newCode;
+        }
+      }
+    }
+
+    function addNewCourse() {
+      saveCurrentCourseToMemory();
+      const newCode = 'NEW-' + Math.floor(Math.random() * 1000);
+      gCourses.push({
+        code: newCode,
+        name: '新課程',
+        outline: '',
+        classDate: '',
+        classTime: '',
+        salesDrill: '',
+        homework: '',
+        participants: '',
+        remarks: ''
+      });
+      populateAdminCourseSelector(newCode);
+    }
+
+    function deleteCurrentCourse() {
+      if (gCourses.length <= 1) {
+        alert('至少需要保留一筆課程資料！');
+        return;
+      }
+      if (confirm(`確定要刪除此課程資料 (${currentEditingCourseCode}) 嗎？`)) {
+        gCourses = gCourses.filter(c => c.code !== currentEditingCourseCode);
+        populateAdminCourseSelector(gCourses[0].code);
+      }
+    }
+
+    function selectCourseByCode(code) {
+      if (!code) return;
+      const course = gCourses.find(c => c.code === code);
+      if (course) {
+        renderCoursePageDetails(course);
+        
+        document.querySelectorAll('.calendar-event-cell').forEach(el => {
+          if (el.getAttribute('data-code') === code) {
+            el.classList.add('selected-event');
+          } else {
+            el.classList.remove('selected-event');
+          }
+        });
       }
     }
 
@@ -2010,22 +2235,28 @@
     /* ==========================================================================
        11. 自適應月曆合併渲染引擎 (Horizontal Merging Algorithm)
        ========================================================================== */
-    function renderCalendar(yearMonth, events) {
+    function renderCalendar(startDateStr, endDateStr, events) {
       const container = document.getElementById('calendar-container');
       container.innerHTML = '';
       
-      const parts = yearMonth.split('-');
-      const year = parseInt(parts[0]);
-      const month = parseInt(parts[1]);
+      const startDStr = (startDateStr || '2026-06-29').substring(0, 10);
+      const endDStr = (endDateStr || '2026-07-03').substring(0, 10);
       
-      const firstDay = new Date(year, month - 1, 1);
-      const startDayOfWeek = firstDay.getDay(); 
+      const startParts = startDStr.split('-');
+      const endParts = endDStr.split('-');
       
-      const lastDay = new Date(year, month, 0);
-      const totalDays = lastDay.getDate();
+      const start = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+      const end = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
       
-      const prevMonthLast = new Date(year, month - 1, 0);
-      const prevMonthLastDay = prevMonthLast.getDate();
+      // 對齊 start 日期至它所在週的星期日 (Sunday)
+      const startDayOfWeek = start.getDay(); 
+      const gridStart = new Date(start);
+      gridStart.setDate(start.getDate() - startDayOfWeek);
+      
+      // 對齊 end 日期至它所在週的星期六 (Saturday)
+      const endDayOfWeek = end.getDay(); 
+      const gridEnd = new Date(end);
+      gridEnd.setDate(end.getDate() + (6 - endDayOfWeek));
       
       const table = document.createElement('table');
       table.className = 'calendar-table';
@@ -2044,51 +2275,29 @@
       const tbody = document.createElement('tbody');
       const gridDays = [];
       
-      // 1. 填入上月剩餘日期
-      let prevYear = year;
-      let prevMonth = month - 1;
-      if (prevMonth === 0) {
-        prevMonth = 12;
-        prevYear = year - 1;
-      }
-      for (let i = startDayOfWeek - 1; i >= 0; i--) {
-        const d = prevMonthLastDay - i;
-        const dStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      let current = new Date(gridStart);
+      const limit = new Date(gridEnd);
+      limit.setHours(12); // 防止日光節約時間干擾
+      
+      while (current <= limit) {
+        const y = current.getFullYear();
+        const m = current.getMonth() + 1;
+        const d = current.getDate();
+        const dStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        
+        // 判斷是否在實際設定的 [startDStr, endDStr] 區間內
+        const isCurrentMonth = (dStr >= startDStr && dStr <= endDStr);
+        
         gridDays.push({
           dayNum: d,
-          isCurrentMonth: false,
+          isCurrentMonth: isCurrentMonth,
           dateStr: dStr
         });
+        
+        current.setDate(current.getDate() + 1);
       }
       
-      // 2. 填入當月日期
-      for (let d = 1; d <= totalDays; d++) {
-        const dStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        gridDays.push({
-          dayNum: d,
-          isCurrentMonth: true,
-          dateStr: dStr
-        });
-      }
-      
-      // 3. 填入下月剩餘日期
-      let nextYear = year;
-      let nextMonth = month + 1;
-      if (nextMonth === 13) {
-        nextMonth = 1;
-        nextYear = year + 1;
-      }
-      let nextMonthDay = 1;
-      while (gridDays.length % 7 !== 0) {
-        const dStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(nextMonthDay).padStart(2, '0')}`;
-        gridDays.push({
-          dayNum: nextMonthDay++,
-          isCurrentMonth: false,
-          dateStr: dStr
-        });
-      }
-      
-      // 4. 按週拆分，逐週渲染
+      // 按週拆分，逐週渲染
       for (let w = 0; w < gridDays.length; w += 7) {
         const week = gridDays.slice(w, w + 7);
         const tr = document.createElement('tr');
@@ -2100,10 +2309,12 @@
           if (!dayData.isCurrentMonth) {
             const td = document.createElement('td');
             td.className = 'other-month-day';
-            let displayText = dayData.dayNum;
-            if (dayData.dayNum === 1 && dayData.dateStr) {
-              displayText = parseInt(dayData.dateStr.split('-')[1]) + '/1';
-            }
+            
+            const p = dayData.dateStr.split('-');
+            const mVal = parseInt(p[1]);
+            const dVal = parseInt(p[2]);
+            const displayText = `${String(mVal).padStart(2, '0')}/${String(dVal).padStart(2, '0')}`;
+            
             td.innerHTML = `<span class="day-number">${displayText}</span>`;
             tr.appendChild(td);
             i++;
@@ -2119,7 +2330,7 @@
               if (!nextDayData.isCurrentMonth) break;
               const nextEvent = findEventForDate(nextDayData.dateStr, events);
               
-              if (nextEvent && nextEvent.name === activeEvent.name) {
+              if (nextEvent && nextEvent.name === activeEvent.name && nextEvent.code === activeEvent.code) {
                 span++;
               } else {
                 break;
@@ -2129,17 +2340,9 @@
             const td = document.createElement('td');
             td.colSpan = span;
             td.className = 'calendar-event-cell';
+            td.setAttribute('data-code', activeEvent.code || '');
             td.style.backgroundColor = activeEvent.color || '#e1e1e1';
-            
-            const daysInSpan = [];
-            let hasFirst = false;
-            for (let s = 0; s < span; s++) {
-              const wd = week[i + s];
-              daysInSpan.push(wd.dayNum);
-              if (wd.dayNum === 1) {
-                hasFirst = true;
-              }
-            }
+            td.onclick = () => selectCourseByCode(activeEvent.code);
             
             let dateLabel = '';
             const startDay = week[i];
@@ -2148,36 +2351,32 @@
             if (startDay.dateStr && endDay.dateStr) {
               const startParts = startDay.dateStr.split('-');
               const endParts = endDay.dateStr.split('-');
-              const startM = parseInt(startParts[1]);
-              const startD = parseInt(startParts[2]);
-              const endM = parseInt(endParts[1]);
-              const endD = parseInt(endParts[2]);
+              const startM = String(parseInt(startParts[1])).padStart(2, '0');
+              const startD = String(parseInt(startParts[2])).padStart(2, '0');
+              const endM = String(parseInt(endParts[1])).padStart(2, '0');
+              const endD = String(parseInt(endParts[2])).padStart(2, '0');
               
-              if (startM !== endM) {
+              if (span > 1) {
                 dateLabel = `${startM}/${startD}–${endM}/${endD}`;
-              } else if (hasFirst || startD === 1) {
-                dateLabel = span > 1 ? `${startM}/${startD}–${endD}日` : `${startM}/${startD}`;
               } else {
-                dateLabel = span > 1 ? `${startD}–${endD}日` : `${startD}日`;
+                dateLabel = `${startM}/${startD}`;
               }
-            } else {
-              dateLabel = daysInSpan.length > 1 
-                ? `${daysInSpan[0]}–${daysInSpan[daysInSpan.length - 1]}日`
-                : `${daysInSpan[0]}日`;
             }
               
+            const eventTitle = activeEvent.code ? `${activeEvent.code}<br>${activeEvent.name}` : activeEvent.name;
             td.innerHTML = `
               <div class="event-date-label">${dateLabel}</div>
-              <div class="event-name-label">${activeEvent.name}</div>
+              <div class="event-name-label">${eventTitle}</div>
             `;
             tr.appendChild(td);
             i += span;
           } else {
             const td = document.createElement('td');
-            let displayText = dayData.dayNum;
-            if (dayData.dayNum === 1 && dayData.dateStr) {
-              displayText = parseInt(dayData.dateStr.split('-')[1]) + '/1';
-            }
+            const p = dayData.dateStr.split('-');
+            const mVal = parseInt(p[1]);
+            const dVal = parseInt(p[2]);
+            const displayText = `${String(mVal).padStart(2, '0')}/${String(dVal).padStart(2, '0')}`;
+            
             td.innerHTML = `<span class="day-number">${displayText}</span>`;
             tr.appendChild(td);
             i++;
@@ -2241,9 +2440,11 @@
         event.target.classList.add('active');
       } else {
         const btnGeneral = buttons[0];
-        const btnCalendar = buttons[1];
-        const btnLogs = buttons[2];
+        const btnLocation = buttons[1];
+        const btnCalendar = buttons[2];
+        const btnLogs = buttons[3];
         if (tabId === 'tab-general') btnGeneral.classList.add('active');
+        if (tabId === 'tab-location') btnLocation.classList.add('active');
         if (tabId === 'tab-calendar') btnCalendar.classList.add('active');
         if (tabId === 'tab-logs') btnLogs.classList.add('active');
       }
@@ -2255,19 +2456,24 @@
     }
 
     /**
+     * 登出後台管理模式
+     */
+    function logoutAdmin() {
+      if (confirm('確定要登出並退出後台管理模式嗎？')) {
+        sessionStorage.removeItem('admin_password');
+        toggleAdminPanel(false);
+        // 重置齒輪按鈕的狀態/前台內容
+        loadPageContent();
+      }
+    }
+
+    /**
      * 將目前的網頁文字設定值寫入至後台表單中
      */
     function populateAdminConfigForm() {
       if (!gConfig) return;
-      document.getElementById('edit-course-code').value = gConfig.course_code || '';
-      document.getElementById('edit-course-name').value = gConfig.course_name || '';
-      document.getElementById('edit-course-outline').value = gConfig.course_outline || '';
-      document.getElementById('edit-class-date').value = gConfig.class_date || '';
-      document.getElementById('edit-class-time').value = gConfig.class_time || '';
-      document.getElementById('edit-sales-drill').value = gConfig.sales_drill || '';
-      document.getElementById('edit-homework').value = gConfig.homework || '';
-      document.getElementById('edit-participants').value = gConfig.participants || '';
-      document.getElementById('edit-remarks').value = gConfig.remarks || '';
+      
+      // 填入全域設定
       document.getElementById('edit-location').value = gConfig.location || '';
       document.getElementById('edit-location-classroom').value = gConfig.location_classroom || '';
       document.getElementById('edit-location-remarks').value = gConfig.location_remarks || '';
@@ -2276,43 +2482,120 @@
       document.getElementById('edit-reg-l1-l3').value = gConfig.reg_l1_l3 || '';
       document.getElementById('edit-notices').value = gConfig.notices || '';
       document.getElementById('edit-contact-info').value = gConfig.contact_info || '';
-      document.getElementById('edit-admin-password').value = ''; // 密碼變更預設空白
+      document.getElementById('edit-admin-password').value = ''; 
+      
+      // 填入課程代碼選單及對應欄位
+      populateAdminCourseSelector(currentEditingCourseCode || (gCourses.length > 0 ? gCourses[0].code : ''));
     }
 
     /**
      * 提交並儲存基本網頁文字
      */
-    function saveGeneralConfig(event) {
+    async function saveGeneralConfig(event) {
       event.preventDefault();
       const pwd = sessionStorage.getItem('admin_password');
       const btnSave = document.getElementById('btn-save-general');
       btnSave.disabled = true;
       btnSave.innerText = '儲存中...';
       
+      // 1. 儲存當前編輯的課程資料到 gCourses
+      saveCurrentCourseToMemory();
+      
+      // 2. 檢查有沒有課程代碼重複或空白
+      let hasError = false;
+      const codesMap = {};
+      gCourses.forEach(c => {
+        if (!c.code) {
+          alert('每個課程都必須填寫「課程代碼」！');
+          hasError = true;
+        }
+        if (codesMap[c.code]) {
+          alert(`「課程代碼」重複：${c.code}，請使用獨一無二的代碼！`);
+          hasError = true;
+        }
+        codesMap[c.code] = true;
+      });
+      
+      if (hasError) {
+        btnSave.disabled = false;
+        btnSave.innerText = '儲存課程與文字';
+        return;
+      }
+      
+      try {
+        // A. 儲存所有課程資料到 CourseDetails sheet
+        const courseResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveCourses',
+            password: pwd,
+            coursesData: gCourses
+          })
+        });
+        const courseResult = await courseResponse.json();
+        
+        // B. 儲存全域 WebConfig 文字資料
+        const globalData = {
+          registration_text: document.getElementById('edit-reg-text').value,
+          registration_url: document.getElementById('edit-reg-url').value,
+          reg_l1_l3: document.getElementById('edit-reg-l1-l3').value,
+          notices: document.getElementById('edit-notices').value,
+          contact_info: document.getElementById('edit-contact-info').value
+        };
+        
+        const newPassword = document.getElementById('edit-admin-password').value;
+        if (newPassword.trim() !== '') {
+          globalData.admin_password = newPassword.trim();
+        }
+        
+        const configResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveConfig',
+            password: pwd,
+            configData: globalData
+          })
+        });
+        const configResult = await configResponse.json();
+        
+        if (courseResult.success && configResult.success) {
+          alert('課程內容與設定儲存成功！');
+          if (newPassword.trim() !== '') {
+            sessionStorage.setItem('admin_password', newPassword.trim());
+          }
+          // 重新整理頁面資料
+          loadPageContent();
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存課程與文字';
+        } else {
+          alert(`儲存失敗！\n課程儲存: ${courseResult.error || '成功'}\n設定儲存: ${configResult.error || '成功'}`);
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存課程與文字';
+        }
+      } catch (err) {
+        alert('儲存過程中發生連線異常：' + err.toString());
+        btnSave.disabled = false;
+        btnSave.innerText = '儲存課程與文字';
+      }
+    }
+
+    /**
+     * 提交並儲存上課地點設定
+     */
+    function saveLocationConfig(event) {
+      event.preventDefault();
+      const pwd = sessionStorage.getItem('admin_password');
+      const btnSave = document.getElementById('btn-save-location');
+      btnSave.disabled = true;
+      btnSave.innerText = '儲存中...';
+      
       const configData = {
-        course_code: document.getElementById('edit-course-code').value,
-        course_name: document.getElementById('edit-course-name').value,
-        course_outline: document.getElementById('edit-course-outline').value,
-        class_date: document.getElementById('edit-class-date').value,
-        class_time: document.getElementById('edit-class-time').value,
-        sales_drill: document.getElementById('edit-sales-drill').value,
-        homework: document.getElementById('edit-homework').value,
-        participants: document.getElementById('edit-participants').value,
-        remarks: document.getElementById('edit-remarks').value,
         location: document.getElementById('edit-location').value,
         location_classroom: document.getElementById('edit-location-classroom').value,
-        location_remarks: document.getElementById('edit-location-remarks').value,
-        registration_text: document.getElementById('edit-reg-text').value,
-        registration_url: document.getElementById('edit-reg-url').value,
-        reg_l1_l3: document.getElementById('edit-reg-l1-l3').value,
-        notices: document.getElementById('edit-notices').value,
-        contact_info: document.getElementById('edit-contact-info').value
+        location_remarks: document.getElementById('edit-location-remarks').value
       };
-      
-      const newPassword = document.getElementById('edit-admin-password').value;
-      if (newPassword.trim() !== '') {
-        configData.admin_password = newPassword.trim();
-      }
       
       fetch(API_URL, {
         method: 'POST',
@@ -2326,21 +2609,20 @@
       .then(r => r.json())
       .then(res => {
         if (res.success) {
-          alert('基本設定儲存成功！');
-          if (newPassword.trim() !== '') {
-            sessionStorage.setItem('admin_password', newPassword.trim());
-          }
-          location.reload();
+          alert('上課地點設定儲存成功！');
+          loadPageContent();
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存地點設定';
         } else {
           alert('儲存失敗：' + res.error);
           btnSave.disabled = false;
-          btnSave.innerText = '儲存網頁文字';
+          btnSave.innerText = '儲存地點設定';
         }
       })
       .catch(err => {
         alert('儲存失敗，連線異常：' + err.toString());
         btnSave.disabled = false;
-        btnSave.innerText = '儲存網頁文字';
+        btnSave.innerText = '儲存地點設定';
       });
     }
 
@@ -2374,7 +2656,7 @@
     function loadAdminEvents() {
       const month = document.getElementById('admin-select-month').value;
       const listContainer = document.getElementById('admin-events-list');
-      listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">載入中...</td></tr>';
+      listContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 15px;">載入中...</td></tr>';
       
       fetch(`${API_URL}?action=getPageData&admin=true&month=${month}`)
       .then(r => r.json())
@@ -2382,11 +2664,11 @@
         if (res.success) {
           renderAdminEventsTable(res.events);
         } else {
-          listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 15px;">載入失敗: ${res.error}</td></tr>`;
+          listContainer.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-red); padding: 15px;">載入失敗: ${res.error}</td></tr>`;
         }
       })
       .catch(err => {
-        listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 15px;">連線異常: ${err.toString()}</td></tr>`;
+        listContainer.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-red); padding: 15px;">連線異常: ${err.toString()}</td></tr>`;
       });
     }
 
@@ -2403,14 +2685,14 @@
       }
       
       events.forEach(evt => {
-        addEventRow(evt.startDate, evt.endDate, evt.name, evt.color);
+        addEventRow(evt.startDate, evt.endDate, evt.code || '', evt.name, evt.color);
       });
     }
 
     /**
      * 新增一列日曆事件
      */
-    function addEventRow(startDate = '', endDate = '', name = '', color = '#e1e1e1') {
+    function addEventRow(startDate = '', endDate = '', code = '', name = '', color = '#e1e1e1') {
       const listContainer = document.getElementById('admin-events-list');
       const tr = document.createElement('tr');
       tr.className = 'event-edit-row';
@@ -2418,6 +2700,7 @@
       tr.innerHTML = `
         <td><input type="date" class="edit-event-start" value="${startDate}" required></td>
         <td><input type="date" class="edit-event-end" value="${endDate}" required></td>
+        <td><input type="text" class="edit-event-code" value="${code}" placeholder="課程代碼" style="width: 80px;"></td>
         <td><input type="text" class="edit-event-name" value="${name}" placeholder="請輸入課程/事件名稱" required></td>
         <td><input type="color" class="edit-event-color" value="${color}" style="width: 50px; height: 30px; padding: 2px;"></td>
         <td><button type="button" class="btn-delete-row" onclick="deleteEventRow(this)">刪除</button></td>
@@ -2465,6 +2748,7 @@
       rows.forEach(r => {
         const start = r.querySelector('.edit-event-start').value;
         const end = r.querySelector('.edit-event-end').value;
+        const code = r.querySelector('.edit-event-code').value.trim();
         const name = r.querySelector('.edit-event-name').value.trim();
         const color = r.querySelector('.edit-event-color').value;
         
@@ -2488,6 +2772,7 @@
         eventsData.push({
           startDate: start,
           endDate: end,
+          code: code,
           name: name,
           color: color
         });
@@ -2526,7 +2811,7 @@
         
         if (configResult.success && evResult.success) {
           alert('行程與顯示週期設定儲存成功！');
-          location.reload();
+          loadPageContent();
         } else {
           alert(`儲存失敗！\n週期儲存: ${configResult.error || '成功'}\n行程儲存: ${evResult.error || '成功'}`);
         }
