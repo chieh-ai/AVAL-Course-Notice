@@ -2200,7 +2200,7 @@
                 : `${daysInSpan[0]}日`;
             }
               
-            const eventTitle = activeEvent.code ? `${activeEvent.code} ${activeEvent.name}` : activeEvent.name;
+            const eventTitle = activeEvent.code ? `${activeEvent.code}<br>${activeEvent.name}` : activeEvent.name;
             td.innerHTML = `
               <div class="event-date-label">${dateLabel}</div>
               <div class="event-name-label">${eventTitle}</div>
