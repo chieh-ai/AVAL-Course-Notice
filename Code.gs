@@ -458,6 +458,36 @@ function initDatabase() {
   if (needsResize) {
     configSheet.autoResizeColumns(1, 3);
   }
+  
+  // 6. 清除行事曆事件中的重複或舊的預設事件以確保前後台顯示一致
+  var calEventsSheet = ss.getSheetByName("CalendarEvents");
+  if (calEventsSheet) {
+    var eventRange = calEventsSheet.getDataRange();
+    var eventValues = eventRange.getValues();
+    var newEventValues = [eventValues[0]]; // 保留標頭
+    var hasDuplicate = false;
+    for (var i = 1; i < eventValues.length; i++) {
+      var name = eventValues[i][3];
+      var start = eventValues[i][1];
+      var end = eventValues[i][2];
+      
+      // 將 start/end 轉為字串格式做比對
+      var startStr = (start instanceof Date) ? Utilities.formatDate(start, "GMT+8", "yyyy-MM-dd") : String(start).substring(0, 10);
+      var endStr = (end instanceof Date) ? Utilities.formatDate(end, "GMT+8", "yyyy-MM-dd") : String(end).substring(0, 10);
+      
+      // 如果名稱為 "AVAL Level 0 for Sales Training (AF01)" 且時間重疊 (6/29~7/3)
+      if (name === "AVAL Level 0 for Sales Training (AF01)" && startStr === "2026-06-29" && endStr === "2026-07-03") {
+        hasDuplicate = true;
+        continue; // 排除此舊事件
+      }
+      newEventValues.push(eventValues[i]);
+    }
+    
+    if (hasDuplicate) {
+      calEventsSheet.clearContents();
+      calEventsSheet.getRange(1, 1, newEventValues.length, 5).setValues(newEventValues);
+    }
+  }
 }
 
 /**
