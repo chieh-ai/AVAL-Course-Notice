@@ -278,7 +278,8 @@ function getPageData(isAdmin, selectedMonth) {
         participants: courseRows[i][7] || "",
         remarks: courseRows[i][8] || "",
         regStatus: courseRows[i][9] || "由經銷業務統一報名",
-        regUrl: courseRows[i][10] || ""
+        regUrl: courseRows[i][10] || "",
+        classroom: courseRows[i][11] || ""
       });
     }
   }
@@ -490,7 +491,6 @@ function initDatabase() {
   var hasStartDateKey = false;
   var hasEndDateKey = false;
   var hasLocRemarksKey = false;
-  var hasLocClassroomKey = false;
   var hasLocationKey = false;
   var hasNoticesKey = false;
   var hasContactInfoKey = false;
@@ -505,7 +505,6 @@ function initDatabase() {
     if (key === "calendar_start_date") hasStartDateKey = true;
     if (key === "calendar_end_date") hasEndDateKey = true;
     if (key === "location_remarks") hasLocRemarksKey = true;
-    if (key === "location_classroom") hasLocClassroomKey = true;
     if (key === "location") hasLocationKey = true;
     if (key === "notices") hasNoticesKey = true;
     if (key === "contact_info") hasContactInfoKey = true;
@@ -545,10 +544,6 @@ function initDatabase() {
     configSheet.appendRow(["location_remarks", "進遠東園區後右側電梯上樓", "上課地點備註"]);
     needsResize = true;
   }
-  if (!hasLocClassroomKey) {
-    configSheet.appendRow(["location_classroom", "906 會議室", "上課地點教室"]);
-    needsResize = true;
-  }
   
   if (needsResize) {
     configSheet.autoResizeColumns(1, 3);
@@ -562,7 +557,7 @@ function initDatabase() {
       var k = configValues[r-1][0];
       if (k === "calendar_start_month" || k === "calendar_end_month" || k === "registration_text" || k === "registration_url" || k === "reg_l1_l3" ||
           k === "course_code" || k === "course_name" || k === "course_outline" || k === "class_date" || k === "class_time" || k === "participants" ||
-          k === "sales_drill" || k === "homework" || k === "remarks") {
+          k === "sales_drill" || k === "homework" || k === "remarks" || k === "location_classroom") {
         configSheet.deleteRow(r);
       }
     }
@@ -630,6 +625,29 @@ function initDatabase() {
         }
         courseSheet.autoResizeColumns(10, 11);
       }
+      
+      // 重新讀取 headers，檢查是否包含 Classroom 欄位
+      courseRows = courseSheet.getDataRange().getValues();
+      headers = courseRows[0];
+      if (headers.indexOf("Classroom") === -1) {
+        courseSheet.getRange(1, 12).setValue("Classroom");
+        courseSheet.getRange(1, 12).setFontWeight("bold").setBackground("#f3f3f3");
+        var lastRow = courseSheet.getLastRow();
+        if (lastRow > 1) {
+          var defaultClassroom = [];
+          for (var r = 2; r <= lastRow; r++) {
+            var code = courseRows[r-1][0];
+            // 若為 AC02，給予預設教室 "906 會議室"
+            if (code === "AC02") {
+              defaultClassroom.push(["906 會議室"]);
+            } else {
+              defaultClassroom.push([""]);
+            }
+          }
+          courseSheet.getRange(2, 12, defaultClassroom.length, 1).setValues(defaultClassroom);
+        }
+        courseSheet.autoResizeColumns(1, 12);
+      }
     }
   }
   
@@ -637,7 +655,7 @@ function initDatabase() {
     courseSheet.clearContents();
     
     var newValues = [
-      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks", "RegStatus", "RegUrl"],
+      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks", "RegStatus", "RegUrl", "Classroom"],
       [
         "AF01",
         "AVAL Level 0 for Sales Training",
@@ -649,6 +667,7 @@ function initDatabase() {
         "富鴻 雲德睿\n秉皇 胡雅恩",
         "請自備環保杯，教室內禁止飲食",
         "由經銷業務統一報名",
+        "",
         ""
       ],
       [
@@ -662,12 +681,13 @@ function initDatabase() {
         "富鴻 雲德睿\n秉皇 胡雅恩、沈思妤",
         "① 建議自備 Mac 筆電，並升級至最新版本（macOS Tahoe 26.5）\n② 確認筆電已安裝最新版 iWork（Pages｜Keynote｜Numbers）軟體（或是訂閱 Apple Creator Studio）",
         "由經銷業務統一報名",
-        ""
+        "",
+        "906 會議室"
       ]
     ];
-    courseSheet.getRange(1, 1, newValues.length, 11).setValues(newValues);
-    courseSheet.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#f3f3f3");
-    courseSheet.autoResizeColumns(1, 11);
+    courseSheet.getRange(1, 1, newValues.length, 12).setValues(newValues);
+    courseSheet.getRange(1, 1, 1, 12).setFontWeight("bold").setBackground("#f3f3f3");
+    courseSheet.autoResizeColumns(1, 12);
     
     // 從 WebConfig 刪除已移轉的課程詳細欄位，以維持 WebConfig 簡潔乾淨
     var keysToRemove = ["course_code", "course_name", "course_outline", "class_date", "class_time", "sales_drill", "homework", "participants", "remarks"];
@@ -781,7 +801,7 @@ function saveCourses(coursesData) {
     sheet.clearContents();
     
     var newValues = [
-      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks", "RegStatus", "RegUrl"]
+      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks", "RegStatus", "RegUrl", "Classroom"]
     ];
     
     for (var i = 0; i < coursesData.length; i++) {
@@ -797,13 +817,14 @@ function saveCourses(coursesData) {
         c.participants || "",
         c.remarks || "",
         c.regStatus || "由經銷業務統一報名",
-        c.regUrl || ""
+        c.regUrl || "",
+        c.classroom || ""
       ]);
     }
     
-    sheet.getRange(1, 1, newValues.length, 11).setValues(newValues);
-    sheet.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#f3f3f3");
-    sheet.autoResizeColumns(1, 11);
+    sheet.getRange(1, 1, newValues.length, 12).setValues(newValues);
+    sheet.getRange(1, 1, 1, 12).setFontWeight("bold").setBackground("#f3f3f3");
+    sheet.autoResizeColumns(1, 12);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.toString() };

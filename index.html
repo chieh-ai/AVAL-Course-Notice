@@ -1224,6 +1224,10 @@
               <td class="detail-value" id="class-time"></td>
             </tr>
             <tr>
+              <td class="detail-label">上課教室</td>
+              <td class="detail-value" id="course-classroom"></td>
+            </tr>
+            <tr>
               <td class="detail-label">參加名單</td>
               <td class="detail-value"><ul id="participants"></ul></td>
             </tr>
@@ -1246,7 +1250,6 @@
         <section id="location-section" class="card">
           <div class="card-title">上課地點</div>
           <div id="location-address" style="font-size: 14px; font-weight: 600; margin-bottom: 4px;"></div>
-          <div id="location-classroom" style="font-size: 14px; font-weight: 500; margin-bottom: 4px;"></div>
           <div id="location-remarks" style="display: none;"></div>
           <div class="map-container">
             <iframe id="map-iframe" src=""></iframe>
@@ -1414,6 +1417,12 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
+                  <label for="edit-course-classroom">上課教室</label>
+                  <input type="text" id="edit-course-classroom" placeholder="例如：906 會議室">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
                   <label for="edit-sales-drill">銷售演練 (留空或填入「◎」)</label>
                   <input type="text" id="edit-sales-drill">
                 </div>
@@ -1460,10 +1469,6 @@
                 <div class="form-group">
                   <label for="edit-location">上課地點 (地址)</label>
                   <input type="text" id="edit-location" required>
-                </div>
-                <div class="form-group">
-                  <label for="edit-location-classroom">上課教室</label>
-                  <input type="text" id="edit-location-classroom">
                 </div>
               </div>
               <div class="form-group">
@@ -1867,16 +1872,8 @@
       
       // 上課地點與地圖
       const location = config.location || '';
-      const classroom = config.location_classroom || '';
       const locRemarks = config.location_remarks || '';
       document.getElementById('location-address').innerText = '地址：' + location;
-      const classroomEl = document.getElementById('location-classroom');
-      if (classroom) {
-        classroomEl.innerText = '教室：' + classroom;
-        classroomEl.style.display = 'block';
-      } else {
-        classroomEl.style.display = 'none';
-      }
       const remarksEl = document.getElementById('location-remarks');
       if (locRemarks) {
         remarksEl.innerText = '備註：' + locRemarks;
@@ -1915,6 +1912,7 @@
       document.getElementById('course-name').innerText = course.name || '';
       document.getElementById('class-date').innerText = course.classDate || '';
       document.getElementById('class-time').innerText = course.classTime || '';
+      document.getElementById('course-classroom').innerText = course.classroom || '';
       
       // 銷售演練 & 課後作業
       setCheckmark(document.getElementById('sales-drill'), course.salesDrill);
@@ -2010,6 +2008,7 @@
       document.getElementById('edit-course-outline').value = course.outline || '';
       document.getElementById('edit-class-date').value = course.classDate || '';
       document.getElementById('edit-class-time').value = course.classTime || '';
+      document.getElementById('edit-course-classroom').value = course.classroom || '';
       document.getElementById('edit-sales-drill').value = course.salesDrill || '';
       document.getElementById('edit-homework').value = course.homework || '';
       document.getElementById('edit-participants').value = course.participants || '';
@@ -2036,6 +2035,7 @@
         course.outline = document.getElementById('edit-course-outline').value;
         course.classDate = document.getElementById('edit-class-date').value;
         course.classTime = document.getElementById('edit-class-time').value;
+        course.classroom = document.getElementById('edit-course-classroom').value.trim();
         course.salesDrill = document.getElementById('edit-sales-drill').value;
         course.homework = document.getElementById('edit-homework').value;
         course.participants = document.getElementById('edit-participants').value;
@@ -2058,6 +2058,7 @@
         outline: '',
         classDate: '',
         classTime: '',
+        classroom: '',
         salesDrill: '',
         homework: '',
         participants: '',
@@ -2559,7 +2560,6 @@
       
       // 填入全域設定
       document.getElementById('edit-location').value = gConfig.location || '';
-      document.getElementById('edit-location-classroom').value = gConfig.location_classroom || '';
       document.getElementById('edit-location-remarks').value = gConfig.location_remarks || '';
       document.getElementById('edit-notices').value = gConfig.notices || '';
       document.getElementById('edit-contact-info').value = gConfig.contact_info || '';
@@ -2742,7 +2742,6 @@
       
       const configData = {
         location: document.getElementById('edit-location').value,
-        location_classroom: document.getElementById('edit-location-classroom').value,
         location_remarks: document.getElementById('edit-location-remarks').value
       };
       
