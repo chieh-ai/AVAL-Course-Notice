@@ -201,18 +201,29 @@ function getPageData(isAdmin, selectedMonth) {
   
   // 3. 讀取選定月份的課程事件 (CalendarEvents)
   var events = [];
+  var isRangeMode = !selectedMonth; // 若前台加載且未選取月份，則為完整日期區間模式
   
   for (var i = 1; i < eventRows.length; i++) {
-    if (formatYearMonth(eventRows[i][0]) === targetMonth) {
-      var eventStart = formatDateString(eventRows[i][1]);
-      var eventEnd = formatDateString(eventRows[i][2]);
-      
+    var eventStart = formatDateString(eventRows[i][1]);
+    var eventEnd = formatDateString(eventRows[i][2]);
+    var eventMonth = formatYearMonth(eventRows[i][0]);
+    
+    var match = false;
+    if (isRangeMode) {
+      // 區間模式：只要事件與前台顯示週期有交集即可
+      if (eventStart <= endDate && eventEnd >= startDate) {
+        match = true;
+      }
+    } else {
+      // 編輯模式：指定月份相符的事件
+      if (eventMonth === targetMonth) {
+        match = true;
+      }
+    }
+    
+    if (match) {
       if (!isAdmin) {
-        // 一般使用者只可以看到行事曆設定區間內的事件
-        if (eventStart > endDate || eventEnd < startDate) {
-          continue; // 不在區間內，跳過
-        }
-        // 裁切事件區間以符合前台顯示週期
+        // 一般使用者進行事件區間裁切以符合顯示週期
         if (eventStart < startDate) {
           eventStart = startDate;
         }
