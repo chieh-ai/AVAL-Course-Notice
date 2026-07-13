@@ -2299,8 +2299,8 @@
       });
       
       // 載入顯示週期設定值
-      document.getElementById('edit-calendar-start').value = gConfig.calendar_start_date || '';
-      document.getElementById('edit-calendar-end').value = gConfig.calendar_end_date || '';
+      document.getElementById('edit-calendar-start').value = gConfig.calendar_start_date ? gConfig.calendar_start_date.substring(0, 10) : '';
+      document.getElementById('edit-calendar-end').value = gConfig.calendar_end_date ? gConfig.calendar_end_date.substring(0, 10) : '';
       
       loadAdminEvents();
     }

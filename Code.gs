@@ -39,6 +39,11 @@ function doGet(e) {
     else if (action === "getResources") {
       responseData = getSharedResources();
     } 
+    else if (action === "debugConfig") {
+      var ss = getSpreadsheet();
+      var sheet = ss.getSheetByName("WebConfig");
+      responseData = { success: true, rows: sheet.getDataRange().getValues() };
+    }
     else {
       responseData = { 
         success: false, 
@@ -138,8 +143,8 @@ function getPageData(isAdmin, selectedMonth) {
   }
   
   // 2. 獲取行事曆月份列表 (動態由週期區間與資料庫事件計算得出)
-  var startDate = config.calendar_start_date || "2026-06-29";
-  var endDate = config.calendar_end_date || "2026-07-03";
+  var startDate = formatDateString(config.calendar_start_date) || "2026-06-29";
+  var endDate = formatDateString(config.calendar_end_date) || "2026-07-03";
   var startMonth = startDate.substring(0, 7);
   var endMonth = endDate.substring(0, 7);
   
