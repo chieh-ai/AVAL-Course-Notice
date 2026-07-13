@@ -645,6 +645,36 @@
       color: var(--accent-red);
     }
 
+    #contact-section {
+      background-color: rgba(255, 255, 255, 0.7) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .fixed-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      z-index: 1000;
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow-x: auto;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    body {
+      padding-bottom: 60px;
+    }
+
     /* Skeleton Loader */
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -1231,16 +1261,6 @@
           </div>
         </section>
 
-        <!-- 區塊：線上報名網址 -->
-        <section id="registration-section" class="card">
-          <div class="card-title">線上報名登記</div>
-          <div class="registration-box">
-            <div class="registration-text" id="reg-text">加載報名資訊中...</div>
-            <a id="btn-registration" target="_blank" class="btn btn-primary btn-block">前往線上報名表單</a>
-            <div id="reg-l1-l3-text" style="font-size: 12px; color: var(--text-muted); margin-top: 12px; text-align: left; padding: 10px; border-left: 2px solid var(--accent-red); background: #fbfbfb;"></div>
-          </div>
-        </section>
-
         <!-- 區塊：共享資源下載區 (Resource) -->
         <section id="resources-section" class="card">
           <div class="card-title">共享資源下載</div>
@@ -1253,9 +1273,20 @@
 
         <!-- 區塊：學員作業上傳區 (Upload) -->
         <section id="upload-section" class="card">
-          <div class="card-title">上課資料與作業繳交</div>
+          <div class="card-title">課程練習與作業繳交</div>
           <form id="upload-form" onsubmit="handleFormSubmit(event)">
             
+            <div class="form-group">
+              <label class="form-label" for="work-type">繳交類型 <span style="color: var(--accent-red);">*</span></label>
+              <select id="work-type" class="form-input" style="width: 100%; height: 44px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white;" required>
+                <option value="課前作業">課前作業</option>
+                <option value="課堂練習">課堂練習</option>
+                <option value="課後作業" selected>課後作業</option>
+                <option value="iOS 檢定腳本">iOS 檢定腳本</option>
+                <option value="Mac 檢定腳本">Mac 檢定腳本</option>
+              </select>
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="student-name">中文全名 <span style="color: var(--accent-red);">*</span></label>
               <input type="text" id="student-name" class="form-input" placeholder="請輸入學員姓名" required>
@@ -1308,6 +1339,11 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- 固定在最下方的聯絡資訊欄 -->
+  <div class="fixed-footer" id="fixed-footer-bar">
+    <span id="footer-contact-info">載入中...</span>
   </div>
 
   <!-- ==========================================================================
@@ -1421,20 +1457,7 @@
                   <input type="url" id="edit-course-reg-url" placeholder="https://...">
                 </div>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="edit-reg-text">報名說明文字</label>
-                  <input type="text" id="edit-reg-text" required>
-                </div>
-                <div class="form-group">
-                  <label for="edit-reg-url">Google Form 報名連結</label>
-                  <input type="url" id="edit-reg-url" required>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="edit-reg-l1-l3">L1-L3 報名說明</label>
-                <input type="text" id="edit-reg-l1-l3" required>
-              </div>
+
               <div class="form-group">
                 <label for="edit-notices">其他重要注意事項 (每行一項)</label>
                 <textarea id="edit-notices" rows="4"></textarea>
@@ -1830,11 +1853,6 @@
      * 渲染文字設定
      */
     function renderGlobalPageDetails(config) {
-      // 報名資訊
-      document.getElementById('reg-text').innerText = config.registration_text || '';
-      document.getElementById('btn-registration').href = config.registration_url || '#';
-      document.getElementById('reg-l1-l3-text').innerText = 'L1-L3：' + (config.reg_l1_l3 || '');
-      
       // 其他注意事項
       renderList(document.getElementById('notices'), config.notices, 'ol');
       
@@ -1865,15 +1883,22 @@
       const contactRaw = config.contact_info || '';
       const parts = contactRaw.split('|');
       if (parts.length >= 3) {
-        document.getElementById('contact-name-label').innerText = parts[0].trim();
+        const name = parts[0].trim();
         const phone = parts[1].trim();
         const email = parts[2].trim();
         
+        document.getElementById('contact-name-label').innerText = name;
         document.getElementById('contact-phone-text').innerText = phone;
         document.getElementById('contact-phone-href').href = `tel:${phone}`;
         
         document.getElementById('contact-email-text').innerText = email;
         document.getElementById('contact-email-href').href = `mailto:${email}`;
+        
+        // 渲染到最下方的固定列中
+        const footerContactEl = document.getElementById('footer-contact-info');
+        if (footerContactEl) {
+          footerContactEl.innerHTML = `<strong>${name}</strong> &nbsp;|&nbsp; 📞 電話：<a href="tel:${phone}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${phone}</a> &nbsp;|&nbsp; ✉️ 信箱：<a href="mailto:${email}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${email}</a>`;
+        }
       }
     }
 
@@ -2220,6 +2245,8 @@
       
       document.getElementById('submit-upload-btn').disabled = true;
 
+      const workType = document.getElementById('work-type').value;
+
       const reader = new FileReader();
       
       reader.onload = function(evt) {
@@ -2238,6 +2265,7 @@
           body: JSON.stringify({
             action: 'uploadFile',
             studentName: studentName,
+            workType: workType,
             fileName: selectedFile.name,
             base64Data: base64Data,
             mimeType: selectedFile.type
@@ -2533,9 +2561,6 @@
       document.getElementById('edit-location').value = gConfig.location || '';
       document.getElementById('edit-location-classroom').value = gConfig.location_classroom || '';
       document.getElementById('edit-location-remarks').value = gConfig.location_remarks || '';
-      document.getElementById('edit-reg-text').value = gConfig.registration_text || '';
-      document.getElementById('edit-reg-url').value = gConfig.registration_url || '';
-      document.getElementById('edit-reg-l1-l3').value = gConfig.reg_l1_l3 || '';
       document.getElementById('edit-notices').value = gConfig.notices || '';
       document.getElementById('edit-contact-info').value = gConfig.contact_info || '';
       document.getElementById('edit-admin-password').value = ''; 
@@ -2593,9 +2618,6 @@
         
         // B. 儲存全域 WebConfig 文字資料
         const globalData = {
-          registration_text: document.getElementById('edit-reg-text').value,
-          registration_url: document.getElementById('edit-reg-url').value,
-          reg_l1_l3: document.getElementById('edit-reg-l1-l3').value,
           notices: document.getElementById('edit-notices').value,
           contact_info: document.getElementById('edit-contact-info').value
         };
@@ -2882,7 +2904,7 @@
     function fetchAdminUploadLogs() {
       const pwd = sessionStorage.getItem('admin_password');
       const listContainer = document.getElementById('admin-logs-list');
-      listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">載入中...</td></tr>';
+      listContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">載入中...</td></tr>';
       
       fetch(API_URL, {
         method: 'POST',
@@ -2897,11 +2919,11 @@
         if (res.success) {
           renderAdminLogs(res.logs);
         } else {
-          listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 30px;">載入失敗: ${res.error}</td></tr>`;
+          listContainer.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-red); padding: 30px;">載入失敗: ${res.error}</td></tr>`;
         }
       })
       .catch(err => {
-        listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 30px;">連線異常: ${err.toString()}</td></tr>`;
+        listContainer.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-red); padding: 30px;">連線異常: ${err.toString()}</td></tr>`;
       });
     }
 
@@ -2913,7 +2935,7 @@
       listContainer.innerHTML = '';
       
       if (!logs || logs.length === 0) {
-        listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">目前尚無學員作業繳交紀錄</td></tr>';
+        listContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">目前尚無學員作業繳交紀錄</td></tr>';
         return;
       }
       
@@ -2922,6 +2944,7 @@
         tr.innerHTML = `
           <td>${l.timestamp}</td>
           <td style="font-weight: 500;">${l.studentName}</td>
+          <td style="color: var(--accent-red); font-weight: 500;">${l.workType || '課後作業'}</td>
           <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${l.fileName}</td>
           <td><a href="${l.fileUrl}" target="_blank" class="link-table">下載檔案 ↗</a></td>
           <td><a href="${l.folderUrl}" target="_blank" class="link-table">學員資料夾 ↗</a></td>

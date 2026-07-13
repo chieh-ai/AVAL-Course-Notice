@@ -87,7 +87,7 @@ function doPost(e) {
       var base64Data = postData.base64Data;
       var mimeType = postData.mimeType;
       
-      responseData = uploadFile(studentName, fileName, base64Data, mimeType);
+      responseData = uploadFile(studentName, fileName, base64Data, mimeType, postData.workType);
     } 
     else if (action === "verifyAdmin") {
       var isValid = checkAdminAuth(postData.password);
@@ -320,7 +320,7 @@ function getSharedResources() {
 /**
  * 處理學生作業上傳
  */
-function uploadFile(studentName, fileName, base64Data, mimeType) {
+function uploadFile(studentName, fileName, base64Data, mimeType, workType) {
   if (!studentName || studentName.trim() === "") {
     throw new Error("請輸入您的中文全名");
   }
@@ -352,6 +352,7 @@ function uploadFile(studentName, fileName, base64Data, mimeType) {
   logSheet.appendRow([
     new Date(),
     studentName,
+    workType || "課後作業",
     fileName,
     file.getUrl(),
     studentFolder.getUrl()
@@ -462,9 +463,26 @@ function initDatabase() {
   var uploadLogsSheet = ss.getSheetByName("UploadLogs");
   if (!uploadLogsSheet) {
     uploadLogsSheet = ss.insertSheet("UploadLogs");
-    uploadLogsSheet.appendRow(["Timestamp", "StudentName", "FileName", "FileUrl", "FolderUrl"]);
-    uploadLogsSheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#f3f3f3");
-    uploadLogsSheet.autoResizeColumns(1, 5);
+    uploadLogsSheet.appendRow(["Timestamp", "StudentName", "WorkType", "FileName", "FileUrl", "FolderUrl"]);
+    uploadLogsSheet.getRange(1, 1, 1, 6).setFontWeight("bold").setBackground("#f3f3f3");
+    uploadLogsSheet.autoResizeColumns(1, 6);
+  } else {
+    var uploadRows = uploadLogsSheet.getDataRange().getValues();
+    var headers = uploadRows[0];
+    if (headers.indexOf("WorkType") === -1) {
+      uploadLogsSheet.insertColumnAfter(2);
+      uploadLogsSheet.getRange(1, 3).setValue("WorkType");
+      uploadLogsSheet.getRange(1, 3).setFontWeight("bold").setBackground("#f3f3f3");
+      var lastRow = uploadLogsSheet.getLastRow();
+      if (lastRow > 1) {
+        var defaultVals = [];
+        for (var r = 2; r <= lastRow; r++) {
+          defaultVals.push(["課後作業"]);
+        }
+        uploadLogsSheet.getRange(2, 3, defaultVals.length, 1).setValues(defaultVals);
+      }
+      uploadLogsSheet.autoResizeColumns(1, 6);
+    }
   }
   
   // 5. 確保 admin_password, calendar_start_date, calendar_end_date, location_remarks 鍵存在於 WebConfig
@@ -509,13 +527,13 @@ function initDatabase() {
     configSheet.autoResizeColumns(1, 3);
   }
   
-  // 5.5. 移除多餘/沒用到的 WebConfig 欄位 (calendar_start_month 和 calendar_end_month)
+  // 5.5. 移除多餘/沒用到的 WebConfig 欄位 (包括 obsolete 的線上報名欄位)
   var configLastRow = configSheet.getLastRow();
   if (configLastRow > 1) {
     var configValues = configSheet.getRange(1, 1, configLastRow, 1).getValues();
     for (var r = configLastRow; r >= 2; r--) {
       var k = configValues[r-1][0];
-      if (k === "calendar_start_month" || k === "calendar_end_month") {
+      if (k === "calendar_start_month" || k === "calendar_end_month" || k === "registration_text" || k === "registration_url" || k === "reg_l1_l3") {
         configSheet.deleteRow(r);
       }
     }
@@ -843,9 +861,10 @@ function getUploadLogs() {
       logs.push({
         timestamp: formatDateString(rows[i][0]) + " " + formatTimeString(rows[i][0]),
         studentName: rows[i][1],
-        fileName: rows[i][2],
-        fileUrl: rows[i][3],
-        folderUrl: rows[i][4]
+        workType: rows[i][2] || "",
+        fileName: rows[i][3],
+        fileUrl: rows[i][4],
+        folderUrl: rows[i][5]
       });
     }
     return { success: true, logs: logs };
