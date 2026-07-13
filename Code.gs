@@ -56,7 +56,7 @@ function doGet(e) {
 
 /**
  * API POST 請求入口
- * 處理學生作業上傳（以 JSON Payload 傳遞）
+ * 處理學生作業上傳及所有後端管理功能
  */
 function doPost(e) {
   var responseData;
@@ -77,11 +77,43 @@ function doPost(e) {
       
       responseData = uploadFile(studentName, fileName, base64Data, mimeType);
     } 
+    else if (action === "verifyAdmin") {
+      var isValid = checkAdminAuth(postData.password);
+      responseData = { success: isValid };
+    }
+    else if (action === "saveConfig") {
+      if (!checkAdminAuth(postData.password)) {
+        responseData = { success: false, error: "密碼驗證失敗，無管理權限。" };
+      } else {
+        responseData = saveWebConfig(postData.configData);
+      }
+    }
+    else if (action === "saveEvents") {
+      if (!checkAdminAuth(postData.password)) {
+        responseData = { success: false, error: "密碼驗證失敗，無管理權限。" };
+      } else {
+        responseData = saveCalendarEvents(postData.yearMonth, postData.eventsData);
+      }
+    }
+    else if (action === "saveCalendars") {
+      if (!checkAdminAuth(postData.password)) {
+        responseData = { success: false, error: "密碼驗證失敗，無管理權限。" };
+      } else {
+        responseData = saveCalendarsStatus(postData.calendarsData);
+      }
+    }
+    else if (action === "getUploadLogs") {
+      if (!checkAdminAuth(postData.password)) {
+        responseData = { success: false, error: "密碼驗證失敗，無管理權限。" };
+      } else {
+        responseData = getUploadLogs();
+      }
+    }
     else {
       responseData = { success: false, error: "未知的 POST 動作 (Action)" };
     }
   } catch (error) {
-    responseData = { success: false, error: "POST 請求解析錯誤: " + error.toString() };
+    responseData = { success: false, error: "POST 請求處理錯誤: " + error.toString() };
   }
   
   return ContentService.createTextOutput(JSON.stringify(responseData))
@@ -94,12 +126,15 @@ function doPost(e) {
 function getPageData(isAdmin, selectedMonth) {
   var ss = getSpreadsheet();
   
-  // 1. 讀取 WebConfig 設定
+  // 1. 讀取 WebConfig 設定 (安全過濾敏感資訊)
   var configSheet = ss.getSheetByName("WebConfig");
   var configRows = configSheet.getDataRange().getValues();
   var config = {};
   for (var i = 1; i < configRows.length; i++) {
-    config[configRows[i][0]] = configRows[i][1];
+    var key = configRows[i][0];
+    if (key !== "admin_password") {
+      config[key] = configRows[i][1];
+    }
   }
   
   // 2. 讀取月曆列表 (Calendars)
@@ -303,6 +338,20 @@ function initDatabase() {
     uploadLogsSheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#f3f3f3");
     uploadLogsSheet.autoResizeColumns(1, 5);
   }
+  
+  // 5. 確保 admin_password 鍵存在於 WebConfig
+  var hasPasswordKey = false;
+  var data = configSheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === "admin_password") {
+      hasPasswordKey = true;
+      break;
+    }
+  }
+  if (!hasPasswordKey) {
+    configSheet.appendRow(["admin_password", "admin123", "系統管理員登入密碼"]);
+    configSheet.autoResizeColumns(1, 3);
+  }
 }
 
 /**
@@ -323,9 +372,157 @@ function formatDateString(date) {
   if (date instanceof Date) {
     return Utilities.formatDate(date, "GMT+8", "yyyy-MM-dd");
   }
+  if (!date) return "";
   var str = date.toString();
   if (str.indexOf("GMT") !== -1 || str.indexOf("T") !== -1) {
     return Utilities.formatDate(new Date(str), "GMT+8", "yyyy-MM-dd");
   }
   return str.split(" ")[0];
+}
+
+/**
+ * 驗證管理員密碼
+ */
+function checkAdminAuth(password) {
+  if (!password) return false;
+  var ss = getSpreadsheet();
+  var configSheet = ss.getSheetByName("WebConfig");
+  if (!configSheet) return false;
+  var configRows = configSheet.getDataRange().getValues();
+  for (var i = 1; i < configRows.length; i++) {
+    if (configRows[i][0] === "admin_password") {
+      return configRows[i][1].toString().trim() === password.trim();
+    }
+  }
+  return false;
+}
+
+/**
+ * 儲存網頁文字設定值
+ */
+function saveWebConfig(configData) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("WebConfig");
+    var range = sheet.getDataRange();
+    var values = range.getValues();
+    
+    for (var i = 1; i < values.length; i++) {
+      var key = values[i][0];
+      if (configData.hasOwnProperty(key)) {
+        values[i][1] = configData[key];
+      }
+    }
+    range.setValues(values);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * 覆寫特定月份的日曆行程
+ */
+function saveCalendarEvents(yearMonth, eventsData) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("CalendarEvents");
+    var range = sheet.getDataRange();
+    var values = range.getValues();
+    var newValues = [values[0]]; // 保留表頭
+    
+    // 保留非本月事件，剔除本月事件以進行覆寫
+    for (var i = 1; i < values.length; i++) {
+      if (values[i][0] !== yearMonth) {
+        newValues.push(values[i]);
+      }
+    }
+    
+    // 加入新的事件列
+    for (var i = 0; i < eventsData.length; i++) {
+      var evt = eventsData[i];
+      newValues.push([
+        yearMonth,
+        evt.startDate,
+        evt.endDate,
+        evt.name,
+        evt.color || "#e1e1e1"
+      ]);
+    }
+    
+    sheet.clearContents();
+    sheet.getRange(1, 1, newValues.length, 5).setValues(newValues);
+    sheet.autoResizeColumns(1, 5);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * 調整月份啟用/封存清單
+ */
+function saveCalendarsStatus(calendarsData) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Calendars");
+    sheet.clearContents();
+    
+    var rows = [["YearMonth", "Status"]];
+    for (var i = 0; i < calendarsData.length; i++) {
+      rows.push([
+        calendarsData[i].yearMonth,
+        calendarsData[i].status
+      ]);
+    }
+    sheet.getRange(1, 1, rows.length, 2).setValues(rows);
+    sheet.autoResizeColumns(1, 2);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * 取得學員作業上傳紀錄
+ */
+function getUploadLogs() {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("UploadLogs");
+    if (!sheet) return { success: true, logs: [] };
+    
+    var rows = sheet.getDataRange().getValues();
+    var logs = [];
+    // 由新到舊 (倒序) 讀取
+    for (var i = rows.length - 1; i >= 1; i--) {
+      logs.push({
+        timestamp: formatDateString(rows[i][0]) + " " + formatTimeString(rows[i][0]),
+        studentName: rows[i][1],
+        fileName: rows[i][2],
+        fileUrl: rows[i][3],
+        folderUrl: rows[i][4]
+      });
+    }
+    return { success: true, logs: logs };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * 輔助函數：時間轉成字串格式 (HH:mm:ss)
+ */
+function formatTimeString(date) {
+  if (date instanceof Date) {
+    return Utilities.formatDate(date, "GMT+8", "HH:mm:ss");
+  }
+  if (!date) return "";
+  var str = date.toString();
+  if (str.indexOf("GMT") !== -1 || str.indexOf("T") !== -1) {
+    return Utilities.formatDate(new Date(str), "GMT+8", "HH:mm:ss");
+  }
+  var parts = str.split(" ");
+  if (parts.length > 1) return parts[1];
+  return "";
 }
