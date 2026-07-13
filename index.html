@@ -842,6 +842,25 @@
       background: rgba(182, 38, 48, 0.08);
       color: var(--accent-red);
     }
+    .admin-logout-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      border: 1px solid #ffcccc;
+      background: #fff5f5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #b62630;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: auto;
+    }
+    .admin-logout-btn:hover {
+      background: #ffe5e5;
+      border-color: #ff9999;
+      color: #901b22;
+    }
     .admin-content {
       flex: 1;
       padding: 30px;
@@ -1142,18 +1161,6 @@
               <td class="detail-value"><ul id="course-outline"></ul></td>
             </tr>
             <tr>
-              <td class="detail-label">上課日期</td>
-              <td class="detail-value" id="class-date"></td>
-            </tr>
-            <tr>
-              <td class="detail-label">上課時間</td>
-              <td class="detail-value" id="class-time"></td>
-            </tr>
-            <tr>
-              <td class="detail-label">參加名單</td>
-              <td class="detail-value"><ul id="participants"></ul></td>
-            </tr>
-            <tr>
               <td class="detail-label">銷售演練</td>
               <td class="detail-value"><span class="badge-icon" id="sales-drill"></span></td>
             </tr>
@@ -1164,6 +1171,18 @@
             <tr>
               <td class="detail-label">備註</td>
               <td class="detail-value"><ul id="remarks"></ul></td>
+            </tr>
+            <tr>
+              <td class="detail-label">上課日期</td>
+              <td class="detail-value" id="class-date"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">上課時間</td>
+              <td class="detail-value" id="class-time"></td>
+            </tr>
+            <tr>
+              <td class="detail-label">參加名單</td>
+              <td class="detail-value"><ul id="participants"></ul></td>
             </tr>
           </table>
         </section>
@@ -1299,6 +1318,8 @@
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-location')">上課地點設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-calendar')">日曆行程管理</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
+          <div style="flex-grow: 1;"></div>
+          <button class="admin-logout-btn" onclick="logoutAdmin()">🚪 安全登出</button>
         </div>
         
         <!-- 右側內容區 -->
@@ -1421,6 +1442,7 @@
                   <tr>
                     <th>開始日期</th>
                     <th>結束日期</th>
+                    <th>課程代碼</th>
                     <th>事件/課程名稱</th>
                     <th>顯示顏色</th>
                     <th>操作</th>
@@ -1664,6 +1686,13 @@
             document.getElementById('calendar-loader').style.display = 'none';
             document.getElementById('details-loader').style.display = 'none';
             document.getElementById('details-table').style.display = 'table';
+            
+            // 重新填入後台表單資料，確保資料與後端最新儲存的一致
+            const adminPwd = sessionStorage.getItem('admin_password');
+            if (adminPwd) {
+              populateAdminConfigForm();
+              populateAdminCalendarSelector();
+            }
           } else {
             alert('載入網頁內容失敗: ' + response.error);
           }
@@ -2124,7 +2153,7 @@
               if (!nextDayData.isCurrentMonth) break;
               const nextEvent = findEventForDate(nextDayData.dateStr, events);
               
-              if (nextEvent && nextEvent.name === activeEvent.name) {
+              if (nextEvent && nextEvent.name === activeEvent.name && nextEvent.code === activeEvent.code) {
                 span++;
               } else {
                 break;
@@ -2171,9 +2200,10 @@
                 : `${daysInSpan[0]}日`;
             }
               
+            const eventTitle = activeEvent.code ? `${activeEvent.code} ${activeEvent.name}` : activeEvent.name;
             td.innerHTML = `
               <div class="event-date-label">${dateLabel}</div>
-              <div class="event-name-label">${activeEvent.name}</div>
+              <div class="event-name-label">${eventTitle}</div>
             `;
             tr.appendChild(td);
             i += span;
@@ -2270,6 +2300,18 @@
     }
 
     /**
+     * 登出後台管理模式
+     */
+    function logoutAdmin() {
+      if (confirm('確定要登出並退出後台管理模式嗎？')) {
+        sessionStorage.removeItem('admin_password');
+        toggleAdminPanel(false);
+        // 重置齒輪按鈕的狀態/前台內容
+        loadPageContent();
+      }
+    }
+
+    /**
      * 將目前的網頁文字設定值寫入至後台表單中
      */
     function populateAdminConfigForm() {
@@ -2342,7 +2384,9 @@
           if (newPassword.trim() !== '') {
             sessionStorage.setItem('admin_password', newPassword.trim());
           }
-          location.reload();
+          loadPageContent();
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存網頁文字';
         } else {
           alert('儲存失敗：' + res.error);
           btnSave.disabled = false;
@@ -2385,7 +2429,9 @@
       .then(res => {
         if (res.success) {
           alert('上課地點設定儲存成功！');
-          location.reload();
+          loadPageContent();
+          btnSave.disabled = false;
+          btnSave.innerText = '儲存地點設定';
         } else {
           alert('儲存失敗：' + res.error);
           btnSave.disabled = false;
@@ -2429,7 +2475,7 @@
     function loadAdminEvents() {
       const month = document.getElementById('admin-select-month').value;
       const listContainer = document.getElementById('admin-events-list');
-      listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 15px;">載入中...</td></tr>';
+      listContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 15px;">載入中...</td></tr>';
       
       fetch(`${API_URL}?action=getPageData&admin=true&month=${month}`)
       .then(r => r.json())
@@ -2437,11 +2483,11 @@
         if (res.success) {
           renderAdminEventsTable(res.events);
         } else {
-          listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 15px;">載入失敗: ${res.error}</td></tr>`;
+          listContainer.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-red); padding: 15px;">載入失敗: ${res.error}</td></tr>`;
         }
       })
       .catch(err => {
-        listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 15px;">連線異常: ${err.toString()}</td></tr>`;
+        listContainer.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-red); padding: 15px;">連線異常: ${err.toString()}</td></tr>`;
       });
     }
 
@@ -2458,14 +2504,14 @@
       }
       
       events.forEach(evt => {
-        addEventRow(evt.startDate, evt.endDate, evt.name, evt.color);
+        addEventRow(evt.startDate, evt.endDate, evt.code || '', evt.name, evt.color);
       });
     }
 
     /**
      * 新增一列日曆事件
      */
-    function addEventRow(startDate = '', endDate = '', name = '', color = '#e1e1e1') {
+    function addEventRow(startDate = '', endDate = '', code = '', name = '', color = '#e1e1e1') {
       const listContainer = document.getElementById('admin-events-list');
       const tr = document.createElement('tr');
       tr.className = 'event-edit-row';
@@ -2473,6 +2519,7 @@
       tr.innerHTML = `
         <td><input type="date" class="edit-event-start" value="${startDate}" required></td>
         <td><input type="date" class="edit-event-end" value="${endDate}" required></td>
+        <td><input type="text" class="edit-event-code" value="${code}" placeholder="課程代碼" style="width: 80px;"></td>
         <td><input type="text" class="edit-event-name" value="${name}" placeholder="請輸入課程/事件名稱" required></td>
         <td><input type="color" class="edit-event-color" value="${color}" style="width: 50px; height: 30px; padding: 2px;"></td>
         <td><button type="button" class="btn-delete-row" onclick="deleteEventRow(this)">刪除</button></td>
@@ -2520,6 +2567,7 @@
       rows.forEach(r => {
         const start = r.querySelector('.edit-event-start').value;
         const end = r.querySelector('.edit-event-end').value;
+        const code = r.querySelector('.edit-event-code').value.trim();
         const name = r.querySelector('.edit-event-name').value.trim();
         const color = r.querySelector('.edit-event-color').value;
         
@@ -2543,6 +2591,7 @@
         eventsData.push({
           startDate: start,
           endDate: end,
+          code: code,
           name: name,
           color: color
         });
@@ -2581,7 +2630,7 @@
         
         if (configResult.success && evResult.success) {
           alert('行程與顯示週期設定儲存成功！');
-          location.reload();
+          loadPageContent();
         } else {
           alert(`儲存失敗！\n週期儲存: ${configResult.error || '成功'}\n行程儲存: ${evResult.error || '成功'}`);
         }

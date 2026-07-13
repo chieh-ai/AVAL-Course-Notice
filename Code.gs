@@ -240,8 +240,9 @@ function getPageData(isAdmin, selectedMonth) {
       events.push({
         startDate: eventStart,
         endDate: eventEnd,
-        name: eventRows[i][3],
-        color: eventRows[i][4]
+        code: eventRows[i][3],
+        name: eventRows[i][4],
+        color: eventRows[i][5]
       });
     }
   }
@@ -378,22 +379,46 @@ function initDatabase() {
   var calEventsSheet = ss.getSheetByName("CalendarEvents");
   if (!calEventsSheet) {
     calEventsSheet = ss.insertSheet("CalendarEvents");
-    calEventsSheet.appendRow(["YearMonth", "StartDate", "EndDate", "EventName", "Color"]);
+    calEventsSheet.appendRow(["YearMonth", "StartDate", "EndDate", "EventCode", "EventName", "Color"]);
     
     var defaultEvents = [
-      ["2026-06", "2026-06-01", "2026-06-05", "Apple Sales Training", "#e1e1e1"],
-      ["2026-06", "2026-06-08", "2026-06-12", "Apple Sales Training", "#e1e1e1"],
-      ["2026-06", "2026-06-15", "2026-06-19", "Apple Sales Training", "#e1e1e1"],
-      ["2026-06", "2026-06-22", "2026-06-26", "Apple Sales Training", "#e1e1e1"],
-      ["2026-06", "2026-06-29", "2026-07-03", "AVAL Level 0 for Sales Training (AF01)", "#ffcccc"],
-      ["2026-05", "2026-05-11", "2026-05-15", "Apple Sales Training (Archived Demo)", "#e1e1e1"]
+      ["2026-06", "2026-06-01", "2026-06-05", "AST", "Apple Sales Training", "#e1e1e1"],
+      ["2026-06", "2026-06-08", "2026-06-12", "AST", "Apple Sales Training", "#e1e1e1"],
+      ["2026-06", "2026-06-15", "2026-06-19", "AST", "Apple Sales Training", "#e1e1e1"],
+      ["2026-06", "2026-06-22", "2026-06-26", "AST", "Apple Sales Training", "#e1e1e1"],
+      ["2026-05", "2026-05-11", "2026-05-15", "AST", "Apple Sales Training (Archived Demo)", "#e1e1e1"]
     ];
     
     for (var i = 0; i < defaultEvents.length; i++) {
       calEventsSheet.appendRow(defaultEvents[i]);
     }
-    calEventsSheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#f3f3f3");
-    calEventsSheet.autoResizeColumns(1, 5);
+    calEventsSheet.getRange(1, 1, 1, 6).setFontWeight("bold").setBackground("#f3f3f3");
+    calEventsSheet.autoResizeColumns(1, 6);
+  } else {
+    // 檢查是否需要升級到 6 欄 (新增 EventCode)
+    var headers = calEventsSheet.getRange(1, 1, 1, calEventsSheet.getLastColumn()).getValues()[0];
+    if (headers.length === 5 && headers[3] === "EventName") {
+      // 插入 EventCode 欄位到第 4 欄 (D 欄)
+      calEventsSheet.insertColumnBefore(4);
+      calEventsSheet.getRange(1, 4).setValue("EventCode");
+      
+      // 給現有的行一個預設的 EventCode
+      var lastRowVal = calEventsSheet.getLastRow();
+      if (lastRowVal > 1) {
+        var names = calEventsSheet.getRange(2, 5, lastRowVal - 1, 1).getValues();
+        var codes = [];
+        for (var r = 0; r < names.length; r++) {
+          var name = names[r][0];
+          if (name.indexOf("AF01") >= 0) codes.push(["AF01"]);
+          else if (name.indexOf("AC02") >= 0) codes.push(["AC02"]);
+          else if (name.indexOf("Apple Sales Training") >= 0) codes.push(["AST"]);
+          else codes.push([""]);
+        }
+        calEventsSheet.getRange(2, 4, lastRowVal - 1, 1).setValues(codes);
+      }
+      calEventsSheet.getRange(1, 1, 1, 6).setFontWeight("bold").setBackground("#f3f3f3");
+      calEventsSheet.autoResizeColumns(1, 6);
+    }
   }
   
   // 4. 建立 UploadLogs (學生上傳紀錄)
@@ -405,10 +430,8 @@ function initDatabase() {
     uploadLogsSheet.autoResizeColumns(1, 5);
   }
   
-  // 5. 確保 admin_password, calendar_start_month, calendar_end_month, calendar_start_date, calendar_end_date, location_remarks 鍵存在於 WebConfig
+  // 5. 確保 admin_password, calendar_start_date, calendar_end_date, location_remarks 鍵存在於 WebConfig
   var hasPasswordKey = false;
-  var hasStartKey = false;
-  var hasEndKey = false;
   var hasStartDateKey = false;
   var hasEndDateKey = false;
   var hasLocRemarksKey = false;
@@ -417,8 +440,6 @@ function initDatabase() {
   for (var i = 1; i < data.length; i++) {
     var key = data[i][0];
     if (key === "admin_password") hasPasswordKey = true;
-    if (key === "calendar_start_month") hasStartKey = true;
-    if (key === "calendar_end_month") hasEndKey = true;
     if (key === "calendar_start_date") hasStartDateKey = true;
     if (key === "calendar_end_date") hasEndDateKey = true;
     if (key === "location_remarks") hasLocRemarksKey = true;
@@ -428,14 +449,6 @@ function initDatabase() {
   var needsResize = false;
   if (!hasPasswordKey) {
     configSheet.appendRow(["admin_password", "admin123", "系統管理員登入密碼"]);
-    needsResize = true;
-  }
-  if (!hasStartKey) {
-    configSheet.appendRow(["calendar_start_month", "2026-06", "行事曆顯示週期開始月份"]);
-    needsResize = true;
-  }
-  if (!hasEndKey) {
-    configSheet.appendRow(["calendar_end_month", "2026-07", "行事曆顯示週期結束月份"]);
     needsResize = true;
   }
   if (!hasStartDateKey) {
@@ -459,6 +472,18 @@ function initDatabase() {
     configSheet.autoResizeColumns(1, 3);
   }
   
+  // 5.5. 移除多餘/沒用到的 WebConfig 欄位 (calendar_start_month 和 calendar_end_month)
+  var configLastRow = configSheet.getLastRow();
+  if (configLastRow > 1) {
+    var configValues = configSheet.getRange(1, 1, configLastRow, 1).getValues();
+    for (var r = configLastRow; r >= 2; r--) {
+      var k = configValues[r-1][0];
+      if (k === "calendar_start_month" || k === "calendar_end_month") {
+        configSheet.deleteRow(r);
+      }
+    }
+  }
+  
   // 6. 清除行事曆事件中的重複或舊的預設事件以確保前後台顯示一致
   var calEventsSheet = ss.getSheetByName("CalendarEvents");
   if (calEventsSheet) {
@@ -466,8 +491,12 @@ function initDatabase() {
     var eventValues = eventRange.getValues();
     var newEventValues = [eventValues[0]]; // 保留標頭
     var hasDuplicate = false;
+    
+    var nameColIndex = eventValues[0].indexOf("EventName");
+    if (nameColIndex === -1) nameColIndex = 3; // fallback
+    
     for (var i = 1; i < eventValues.length; i++) {
-      var name = eventValues[i][3];
+      var name = eventValues[i][nameColIndex];
       var start = eventValues[i][1];
       var end = eventValues[i][2];
       
@@ -485,7 +514,7 @@ function initDatabase() {
     
     if (hasDuplicate) {
       calEventsSheet.clearContents();
-      calEventsSheet.getRange(1, 1, newEventValues.length, 5).setValues(newEventValues);
+      calEventsSheet.getRange(1, 1, newEventValues.length, eventValues[0].length).setValues(newEventValues);
     }
   }
 }
@@ -599,14 +628,15 @@ function saveCalendarEvents(yearMonth, eventsData) {
         yearMonth,
         evt.startDate,
         evt.endDate,
+        evt.code || "",
         evt.name,
         evt.color || "#e1e1e1"
       ]);
     }
     
     sheet.clearContents();
-    sheet.getRange(1, 1, newValues.length, 5).setValues(newValues);
-    sheet.autoResizeColumns(1, 5);
+    sheet.getRange(1, 1, newValues.length, 6).setValues(newValues);
+    sheet.autoResizeColumns(1, 6);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.toString() };
