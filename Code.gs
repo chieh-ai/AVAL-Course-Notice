@@ -491,10 +491,14 @@ function initDatabase() {
   var hasEndDateKey = false;
   var hasLocRemarksKey = false;
   var hasLocClassroomKey = false;
+  var passwordRowIndex = -1;
   var data = configSheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     var key = data[i][0];
-    if (key === "admin_password") hasPasswordKey = true;
+    if (key === "admin_password") {
+      hasPasswordKey = true;
+      passwordRowIndex = i + 1;
+    }
     if (key === "calendar_start_date") hasStartDateKey = true;
     if (key === "calendar_end_date") hasEndDateKey = true;
     if (key === "location_remarks") hasLocRemarksKey = true;
@@ -503,8 +507,13 @@ function initDatabase() {
   
   var needsResize = false;
   if (!hasPasswordKey) {
-    configSheet.appendRow(["admin_password", "admin123", "系統管理員登入密碼"]);
+    configSheet.appendRow(["admin_password", "xozwav-kaJxyh-7zukme", "系統管理員登入密碼"]);
     needsResize = true;
+  } else if (passwordRowIndex !== -1) {
+    var currentPassword = data[passwordRowIndex - 1][1].toString().trim();
+    if (currentPassword === "admin123") {
+      configSheet.getRange(passwordRowIndex, 2).setValue("xozwav-kaJxyh-7zukme");
+    }
   }
   if (!hasStartDateKey) {
     configSheet.appendRow(["calendar_start_date", "2026-06-29", "行事曆顯示週期開始日期"]);
