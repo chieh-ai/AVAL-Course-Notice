@@ -137,32 +137,60 @@ function getPageData(isAdmin, selectedMonth) {
     }
   }
   
-  // 2. 讀取月曆列表 (Calendars)
-  var calSheet = ss.getSheetByName("Calendars");
-  var calRows = calSheet.getDataRange().getValues();
+  // 2. 獲取行事曆月份列表 (動態由週期區間與資料庫事件計算得出)
+  var startMonth = config.calendar_start_month || "2026-06";
+  var endMonth = config.calendar_end_month || "2026-07";
+  
+  var configuredMonths = getMonthsInRange(startMonth, endMonth);
   var calendars = [];
+  
+  var eventSheet = ss.getSheetByName("CalendarEvents");
+  var eventRows = eventSheet.getDataRange().getValues();
+  
+  if (isAdmin) {
+    // 管理員可看到：所有已建立事件的月份 + 設定區間內的月份
+    var allMonthsMap = {};
+    configuredMonths.forEach(function(m) {
+      allMonthsMap[m] = { yearMonth: m, status: "Active" };
+    });
+    for (var i = 1; i < eventRows.length; i++) {
+      var ym = eventRows[i][0];
+      if (ym) {
+        if (!allMonthsMap.hasOwnProperty(ym)) {
+          allMonthsMap[ym] = { yearMonth: ym, status: "Archived" };
+        }
+      }
+    }
+    var sortedYM = Object.keys(allMonthsMap).sort();
+    calendars = sortedYM.map(function(ym) {
+      return allMonthsMap[ym];
+    });
+  } else {
+    // 一般用戶：只可看到設定區間內的月份
+    calendars = configuredMonths.map(function(m) {
+      return { yearMonth: m, status: "Active" };
+    });
+  }
+  
+  // 計算預設顯示的月份 (activeMonth)
   var activeMonth = "";
+  if (selectedMonth) {
+    var exists = calendars.some(function(c) { return c.yearMonth === selectedMonth; });
+    if (exists) activeMonth = selectedMonth;
+  }
   
-  for (var i = 1; i < calRows.length; i++) {
-    var ym = calRows[i][0];
-    var status = calRows[i][1];
-    
-    if (status === "Active" || isAdmin) {
-      calendars.push({
-        yearMonth: ym,
-        status: status
-      });
-    }
-    
-    if (status === "Active" && !selectedMonth) {
-      activeMonth = ym;
+  if (!activeMonth) {
+    var today = new Date();
+    var curYM = today.getFullYear() + "-" + ((today.getMonth() + 1) < 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1));
+    var hasCurrent = calendars.some(function(c) { return c.yearMonth === curYM; });
+    if (hasCurrent) {
+      activeMonth = curYM;
+    } else if (calendars.length > 0) {
+      activeMonth = calendars[0].yearMonth;
     }
   }
   
-  var targetMonth = selectedMonth || activeMonth;
-  if (!targetMonth && calendars.length > 0) {
-    targetMonth = calendars[0].yearMonth;
-  }
+  var targetMonth = activeMonth;
   
   // 3. 讀取選定月份的課程事件 (CalendarEvents)
   var eventSheet = ss.getSheetByName("CalendarEvents");
@@ -339,17 +367,33 @@ function initDatabase() {
     uploadLogsSheet.autoResizeColumns(1, 5);
   }
   
-  // 5. 確保 admin_password 鍵存在於 WebConfig
+  // 5. 確保 admin_password, calendar_start_month, calendar_end_month 鍵存在於 WebConfig
   var hasPasswordKey = false;
+  var hasStartKey = false;
+  var hasEndKey = false;
   var data = configSheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
-    if (data[i][0] === "admin_password") {
-      hasPasswordKey = true;
-      break;
-    }
+    var key = data[i][0];
+    if (key === "admin_password") hasPasswordKey = true;
+    if (key === "calendar_start_month") hasStartKey = true;
+    if (key === "calendar_end_month") hasEndKey = true;
   }
+  
+  var needsResize = false;
   if (!hasPasswordKey) {
     configSheet.appendRow(["admin_password", "admin123", "系統管理員登入密碼"]);
+    needsResize = true;
+  }
+  if (!hasStartKey) {
+    configSheet.appendRow(["calendar_start_month", "2026-06", "行事曆顯示週期開始月份"]);
+    needsResize = true;
+  }
+  if (!hasEndKey) {
+    configSheet.appendRow(["calendar_end_month", "2026-07", "行事曆顯示週期結束月份"]);
+    needsResize = true;
+  }
+  
+  if (needsResize) {
     configSheet.autoResizeColumns(1, 3);
   }
 }
@@ -525,4 +569,36 @@ function formatTimeString(date) {
   var parts = str.split(" ");
   if (parts.length > 1) return parts[1];
   return "";
+}
+
+/**
+ * 計算兩個年份月份字串 (YYYY-MM) 之間所有的月份列表 (包含首尾)
+ */
+function getMonthsInRange(startStr, endStr) {
+  var months = [];
+  try {
+    var startParts = startStr.split("-");
+    var endParts = endStr.split("-");
+    var startYear = parseInt(startParts[0]);
+    var startMonth = parseInt(startParts[1]);
+    var endYear = parseInt(endParts[0]);
+    var endMonth = parseInt(endParts[1]);
+    
+    var currYear = startYear;
+    var currMonth = startMonth;
+    
+    while (currYear < endYear || (currYear === endYear && currMonth <= endMonth)) {
+      var mStr = currMonth < 10 ? "0" + currMonth : "" + currMonth;
+      months.push(currYear + "-" + mStr);
+      currMonth++;
+      if (currMonth > 12) {
+        currMonth = 1;
+        currYear++;
+      }
+    }
+  } catch (e) {
+    // 容錯回傳起點月份
+    return [startStr];
+  }
+  return months;
 }

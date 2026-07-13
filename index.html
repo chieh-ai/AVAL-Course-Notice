@@ -101,6 +101,17 @@
       color: var(--text-main);
     }
 
+    /* 齒輪圖示微動畫 */
+    .admin-nav-link {
+      font-size: 16px !important;
+      display: inline-block;
+      transition: transform 0.3s ease, color 0.3s ease !important;
+    }
+    .admin-nav-link:hover {
+      transform: rotate(45deg);
+      color: var(--accent-red) !important;
+    }
+
     /* ==========================================================================
        3. 主排版與卡片設計 (Main Layout & Cards)
        ========================================================================== */
@@ -1057,20 +1068,20 @@
   <!-- 1. 導覽列 -->
   <header>
     <div class="container header-container">
-      <a href="#" class="logo"><span></span> AVAL 暐固科技</a>
+      <a href="#" class="logo"><span></span> AVAL Technologies</a>
       <nav>
         <a href="#calendar-section">課程表</a>
         <a href="#details-section">課程說明</a>
         <a href="#location-section">上課地點</a>
         <a href="#resources-section">教材共享</a>
         <a href="#upload-section">作業繳交</a>
+        <a href="javascript:void(0)" onclick="triggerAdminLogin()" class="admin-nav-link" id="nav-admin-link" title="管理控制台">⚙️</a>
       </nav>
     </div>
   </header>
 
   <div class="container" style="margin-top: 40px;">
     <!-- 2. 主標題區 -->
-    <h1 class="page-title" id="web-title"><div class="skeleton" style="width: 300px; height: 38px;"></div></h1>
     <p class="page-subtitle">暐固科技數位轉型系列課程 &middot; 培訓計畫公告</p>
 
     <!-- 3. 主版型 Grid -->
@@ -1083,7 +1094,7 @@
         <section id="calendar-section" class="card">
           <div class="card-title">
             <div class="calendar-header">
-              <span>Apple Sales Training 課程表</span>
+              <span>Sales Training 課程表</span>
               <div style="display: flex; align-items: center;">
                 <select id="month-selector" class="month-select" style="display: none;" onchange="onMonthChange()"></select>
                 <span id="admin-indicator" class="admin-badge" style="display: none;">管理員模式</span>
@@ -1255,10 +1266,7 @@
     </div>
   </div>
 
-  <!-- 「⚙️ 管理後台」懸浮按鈕 -->
-  <button class="admin-fab" id="admin-fab" style="display: none;" onclick="toggleAdminPanel(true)">
-    ⚙️ 管理後台
-  </button>
+
 
   <!-- 後台控制台彈出視窗 -->
   <div class="admin-panel-overlay" id="admin-panel-overlay" style="display: none;">
@@ -1384,14 +1392,23 @@
               </table>
             </div>
             
-            <!-- 月份啟用/封存管理 -->
+            <!-- 月份顯示週期設定 -->
             <div class="months-admin-section">
-              <div class="admin-section-title">歷史月份與封存管理</div>
-              <div class="months-grid" id="admin-months-grid"></div>
+              <div class="admin-section-title">設定前台顯示週期</div>
+              <div class="form-row" style="margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="edit-calendar-start">開始顯示月份</label>
+                  <input type="month" id="edit-calendar-start" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="edit-calendar-end">結束顯示月份</label>
+                  <input type="month" id="edit-calendar-end" required>
+                </div>
+              </div>
             </div>
             
             <div class="admin-footer-actions">
-              <button class="btn btn-primary" onclick="saveAdminCalendarData()">儲存行程與月份設定</button>
+              <button class="btn btn-primary" onclick="saveAdminCalendarData()">儲存行程與週期設定</button>
             </div>
           </div>
           
@@ -1484,7 +1501,6 @@
       .then(res => {
         if (res.success) {
           showLoginOverlay(false);
-          document.getElementById('admin-fab').style.display = 'flex';
           loadPageContent();
           loadDriveResources();
           initDragAndDrop();
@@ -1537,7 +1553,6 @@
         if (res.success) {
           sessionStorage.setItem('admin_password', pwd);
           showLoginOverlay(false);
-          document.getElementById('admin-fab').style.display = 'flex';
           errorMsg.innerText = '';
           pwdInput.value = '';
           // 載入內容
@@ -1681,7 +1696,10 @@
      * 渲染文字設定
      */
     function renderPageDetails(config) {
-      document.getElementById('web-title').innerText = config.course_name || '課程公告';
+      const webTitleEl = document.getElementById('web-title');
+      if (webTitleEl) {
+        webTitleEl.innerText = config.course_name || '課程公告';
+      }
       document.getElementById('course-code').innerText = config.course_code || '';
       document.getElementById('course-name').innerText = config.course_name || '';
       document.getElementById('class-date').innerText = config.class_date || '';
@@ -2091,6 +2109,18 @@
        後端管理系統 JS 控制邏輯
        ========================================================================== */
     /**
+     * 點擊導覽列齒輪觸發登入或開啟後台
+     */
+    function triggerAdminLogin() {
+      const pwd = sessionStorage.getItem('admin_password');
+      if (pwd) {
+        toggleAdminPanel(true);
+      } else {
+        showLoginOverlay(true);
+      }
+    }
+
+    /**
      * 開啟或關閉後台控制面板
      */
     function toggleAdminPanel(show) {
@@ -2221,7 +2251,7 @@
     }
 
     /**
-     * 初始化行程分頁中的月份選單
+     * 初始化行程分頁中的月份選單與顯示區間
      */
     function populateAdminCalendarSelector() {
       const select = document.getElementById('admin-select-month');
@@ -2230,15 +2260,18 @@
       gCalendars.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m.yearMonth;
-        opt.innerText = formatYearMonthZH(m.yearMonth) + (m.status === 'Archived' ? ' (已封存)' : '');
+        opt.innerText = formatYearMonthZH(m.yearMonth) + (m.status === 'Archived' ? ' (區間外/歷史)' : '');
         if (m.yearMonth === currentSelectedMonth) {
           opt.selected = true;
         }
         select.appendChild(opt);
       });
       
+      // 載入顯示週期設定值
+      document.getElementById('edit-calendar-start').value = gConfig.calendar_start_month || '';
+      document.getElementById('edit-calendar-end').value = gConfig.calendar_end_month || '';
+      
       loadAdminEvents();
-      renderAdminMonthsGrid();
     }
 
     /**
@@ -2311,46 +2344,26 @@
     }
 
     /**
-     * 渲染歷史月份管理格表
-     */
-    function renderAdminMonthsGrid() {
-      const grid = document.getElementById('admin-months-grid');
-      grid.innerHTML = '';
-      
-      gCalendars.forEach(m => {
-        const card = document.createElement('div');
-        card.className = 'month-status-card';
-        card.dataset.ym = m.yearMonth;
-        
-        card.innerHTML = `
-          <span class="month-status-name">${formatYearMonthZH(m.yearMonth)}</span>
-          <select class="month-status-select" onchange="updateCalendarStatusLocal(this, '${m.yearMonth}')">
-            <option value="Active" ${m.status === 'Active' ? 'selected' : ''}>Active (啟用)</option>
-            <option value="Archived" ${m.status === 'Archived' ? 'selected' : ''}>Archived (封存)</option>
-          </select>
-        `;
-        grid.appendChild(card);
-      });
-    }
-    
-    /**
-     * 變更本地月份封存狀態 (尚未儲存至 Sheet)
-     */
-    function updateCalendarStatusLocal(selectEl, ym) {
-      const m = gCalendars.find(item => item.yearMonth === ym);
-      if (m) {
-        m.status = selectEl.value;
-      }
-    }
-
-    /**
-     * 一併儲存行程事件與封存狀態設定
+     * 一併儲存行程事件與顯示週期設定
      */
     async function saveAdminCalendarData() {
       const pwd = sessionStorage.getItem('admin_password');
       const month = document.getElementById('admin-select-month').value;
       
-      // 1. 整理行程資料
+      // 1. 取得並驗證前台顯示週期
+      const startMonth = document.getElementById('edit-calendar-start').value;
+      const endMonth = document.getElementById('edit-calendar-end').value;
+      
+      if (!startMonth || !endMonth) {
+        alert('請填寫完整的前台顯示開始與結束月份！');
+        return;
+      }
+      if (startMonth > endMonth) {
+        alert('顯示開始月份不能晚於結束月份！');
+        return;
+      }
+      
+      // 2. 整理行程資料
       const rows = document.querySelectorAll('.event-edit-row');
       const eventsData = [];
       let hasError = false;
@@ -2388,14 +2401,23 @@
       
       if (hasError) return;
       
-      // 2. 整理月份狀態
-      const calendarsData = gCalendars.map(m => ({
-        yearMonth: m.yearMonth,
-        status: m.status
-      }));
-      
       try {
-        // 儲存事件
+        // A. 儲存顯示週期設定
+        const configResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'saveConfig',
+            password: pwd,
+            configData: {
+              calendar_start_month: startMonth,
+              calendar_end_month: endMonth
+            }
+          })
+        });
+        const configResult = await configResponse.json();
+        
+        // B. 儲存事件資料
         const evResponse = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain' },
@@ -2408,23 +2430,11 @@
         });
         const evResult = await evResponse.json();
         
-        // 儲存狀態
-        const calResponse = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({
-            action: 'saveCalendars',
-            password: pwd,
-            calendarsData: calendarsData
-          })
-        });
-        const calResult = await calResponse.json();
-        
-        if (evResult.success && calResult.success) {
-          alert('日曆行程與歷史月份狀態儲存成功！');
+        if (configResult.success && evResult.success) {
+          alert('行程與顯示週期設定儲存成功！');
           location.reload();
         } else {
-          alert(`儲存失敗！\n日曆儲存: ${evResult.error || '成功'}\n狀態儲存: ${calResult.error || '成功'}`);
+          alert(`儲存失敗！\n週期儲存: ${configResult.error || '成功'}\n行程儲存: ${evResult.error || '成功'}`);
         }
       } catch (err) {
         alert('儲存過程中發生連線異常：' + err.toString());
