@@ -491,6 +491,9 @@ function initDatabase() {
   var hasEndDateKey = false;
   var hasLocRemarksKey = false;
   var hasLocClassroomKey = false;
+  var hasLocationKey = false;
+  var hasNoticesKey = false;
+  var hasContactInfoKey = false;
   var passwordRowIndex = -1;
   var data = configSheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
@@ -503,6 +506,9 @@ function initDatabase() {
     if (key === "calendar_end_date") hasEndDateKey = true;
     if (key === "location_remarks") hasLocRemarksKey = true;
     if (key === "location_classroom") hasLocClassroomKey = true;
+    if (key === "location") hasLocationKey = true;
+    if (key === "notices") hasNoticesKey = true;
+    if (key === "contact_info") hasContactInfoKey = true;
   }
   
   var needsResize = false;
@@ -514,6 +520,18 @@ function initDatabase() {
     if (currentPassword === "admin123") {
       configSheet.getRange(passwordRowIndex, 2).setValue("xozwav-kaJxyh-7zukme");
     }
+  }
+  if (!hasLocationKey) {
+    configSheet.appendRow(["location", "新北市新店區中正路 535 號", "上課地點"]);
+    needsResize = true;
+  }
+  if (!hasNoticesKey) {
+    configSheet.appendRow(["notices", "1. 上課過程若有發燒、咳嗽...等不適狀況請務必即時通報公司主管（窗口）及課程講師。\n2. 響應環保，若有飲水需求，請自備水壺、水杯...等日常用品。\n3. 北部近日天氣不穩定，請自行評估是否攜帶雨具及保暖衣物以備不時之需。", "其他重要注意事項"]);
+    needsResize = true;
+  }
+  if (!hasContactInfoKey) {
+    configSheet.appendRow(["contact_info", "暐固科技 業務行銷處 吳俊頡 副理 | 02-22186188 | chieh.wu@senao.com.tw", "聯絡資訊"]);
+    needsResize = true;
   }
   if (!hasStartDateKey) {
     configSheet.appendRow(["calendar_start_date", "2026-06-29", "行事曆顯示週期開始日期"]);
