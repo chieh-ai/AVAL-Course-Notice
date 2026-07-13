@@ -276,7 +276,9 @@ function getPageData(isAdmin, selectedMonth) {
         salesDrill: courseRows[i][5] || "",
         homework: courseRows[i][6] || "",
         participants: courseRows[i][7] || "",
-        remarks: courseRows[i][8] || ""
+        remarks: courseRows[i][8] || "",
+        regStatus: courseRows[i][9] || "由經銷業務統一報名",
+        regUrl: courseRows[i][10] || ""
       });
     }
   }
@@ -564,6 +566,23 @@ function initDatabase() {
     var codes = courseRows.slice(1).map(function(r) { return r[0]; });
     if (codes.indexOf("AF01") === -1 || codes.filter(function(c) { return c === "AC02"; }).length > 1) {
       rebuildCourses = true;
+    } else {
+      // 檢查是否包含新增的 RegStatus 與 RegUrl 欄位，若無則進行擴展
+      var headers = courseRows[0];
+      if (headers.indexOf("RegStatus") === -1) {
+        courseSheet.getRange(1, 10).setValue("RegStatus");
+        courseSheet.getRange(1, 11).setValue("RegUrl");
+        courseSheet.getRange(1, 10, 1, 2).setFontWeight("bold").setBackground("#f3f3f3");
+        var lastRow = courseSheet.getLastRow();
+        if (lastRow > 1) {
+          var defaultStatus = [];
+          for (var r = 2; r <= lastRow; r++) {
+            defaultStatus.push(["由經銷業務統一報名", ""]);
+          }
+          courseSheet.getRange(2, 10, defaultStatus.length, 2).setValues(defaultStatus);
+        }
+        courseSheet.autoResizeColumns(10, 11);
+      }
     }
   }
   
@@ -571,7 +590,7 @@ function initDatabase() {
     courseSheet.clearContents();
     
     var newValues = [
-      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks"],
+      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks", "RegStatus", "RegUrl"],
       [
         "AF01",
         "AVAL Level 0 for Sales Training",
@@ -581,7 +600,9 @@ function initDatabase() {
         "◎",
         "◎",
         "富鴻 雲德睿\n秉皇 胡雅恩",
-        "請自備環保杯，教室內禁止飲食"
+        "請自備環保杯，教室內禁止飲食",
+        "由經銷業務統一報名",
+        ""
       ],
       [
         "AC02",
@@ -592,12 +613,14 @@ function initDatabase() {
         "◎",
         "◎",
         "富鴻 雲德睿\n秉皇 胡雅恩、沈思妤",
-        "① 建議自備 Mac 筆電，並升級至最新版本（macOS Tahoe 26.5）\n② 確認筆電已安裝最新版 iWork（Pages｜Keynote｜Numbers）軟體（或是訂閱 Apple Creator Studio）"
+        "① 建議自備 Mac 筆電，並升級至最新版本（macOS Tahoe 26.5）\n② 確認筆電已安裝最新版 iWork（Pages｜Keynote｜Numbers）軟體（或是訂閱 Apple Creator Studio）",
+        "由經銷業務統一報名",
+        ""
       ]
     ];
-    courseSheet.getRange(1, 1, newValues.length, 9).setValues(newValues);
-    courseSheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#f3f3f3");
-    courseSheet.autoResizeColumns(1, 9);
+    courseSheet.getRange(1, 1, newValues.length, 11).setValues(newValues);
+    courseSheet.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#f3f3f3");
+    courseSheet.autoResizeColumns(1, 11);
     
     // 從 WebConfig 刪除已移轉的課程詳細欄位，以維持 WebConfig 簡潔乾淨
     var keysToRemove = ["course_code", "course_name", "course_outline", "class_date", "class_time", "sales_drill", "homework", "participants", "remarks"];
@@ -711,7 +734,7 @@ function saveCourses(coursesData) {
     sheet.clearContents();
     
     var newValues = [
-      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks"]
+      ["CourseCode", "CourseName", "CourseOutline", "ClassDate", "ClassTime", "SalesDrill", "Homework", "Participants", "Remarks", "RegStatus", "RegUrl"]
     ];
     
     for (var i = 0; i < coursesData.length; i++) {
@@ -725,13 +748,15 @@ function saveCourses(coursesData) {
         c.salesDrill || "",
         c.homework || "",
         c.participants || "",
-        c.remarks || ""
+        c.remarks || "",
+        c.regStatus || "由經銷業務統一報名",
+        c.regUrl || ""
       ]);
     }
     
-    sheet.getRange(1, 1, newValues.length, 9).setValues(newValues);
-    sheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#f3f3f3");
-    sheet.autoResizeColumns(1, 9);
+    sheet.getRange(1, 1, newValues.length, 11).setValues(newValues);
+    sheet.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#f3f3f3");
+    sheet.autoResizeColumns(1, 11);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.toString() };

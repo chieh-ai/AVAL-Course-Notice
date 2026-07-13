@@ -1202,6 +1202,13 @@
               <td class="detail-label">參加名單</td>
               <td class="detail-value"><ul id="participants"></ul></td>
             </tr>
+            <tr>
+              <td class="detail-label">課程報名</td>
+              <td class="detail-value">
+                <span id="course-reg-status">由經銷業務統一報名</span>
+                <a id="btn-course-reg" target="_blank" class="btn btn-primary" style="display: none; margin-left: 12px; padding: 4px 12px; font-size: 13px; text-decoration: none; border-radius: 4px; vertical-align: middle;">立即報名</a>
+              </td>
+            </tr>
           </table>
         </section>
 
@@ -1397,6 +1404,21 @@
               <div class="form-group">
                 <label for="edit-remarks">備註事項 (每行一項)</label>
                 <textarea id="edit-remarks" rows="4"></textarea>
+              </div>
+              <div class="form-row" style="margin-top: 15px;">
+                <div class="form-group" style="flex: 1;">
+                  <label for="edit-course-reg-status">課程報名</label>
+                  <select id="edit-course-reg-status" onchange="toggleCourseRegUrlField()" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white;">
+                    <option value="未開放報名">未開放報名</option>
+                    <option value="由經銷業務統一報名">由經銷業務統一報名</option>
+                    <option value="已改期或取消">已改期或取消</option>
+                    <option value="門市新人自行報名">門市新人自行報名</option>
+                  </select>
+                </div>
+                <div class="form-group" id="edit-course-reg-url-group" style="flex: 1; display: none;">
+                  <label for="edit-course-reg-url">報名網址</label>
+                  <input type="url" id="edit-course-reg-url" placeholder="https://...">
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -1875,6 +1897,18 @@
       renderList(document.getElementById('participants'), course.participants);
       renderList(document.getElementById('remarks'), course.remarks);
       
+      // 課程報名欄位處理
+      const regStatus = course.regStatus || '由經銷業務統一報名';
+      const regUrl = course.regUrl || '';
+      document.getElementById('course-reg-status').innerText = regStatus;
+      const btnReg = document.getElementById('btn-course-reg');
+      if (regStatus === '門市新人自行報名' && regUrl) {
+        btnReg.href = regUrl;
+        btnReg.style.display = 'inline-block';
+      } else {
+        btnReg.style.display = 'none';
+      }
+      
       // 添加淡入淡出動畫效果，讓細節切換看起來非常優雅
       const detailsSection = document.getElementById('details-section');
       if (detailsSection) {
@@ -1887,6 +1921,18 @@
     }
 
     let currentEditingCourseCode = '';
+
+    function toggleCourseRegUrlField() {
+      const statusSelect = document.getElementById('edit-course-reg-status');
+      const urlGroup = document.getElementById('edit-course-reg-url-group');
+      if (statusSelect && urlGroup) {
+        if (statusSelect.value === '門市新人自行報名') {
+          urlGroup.style.display = 'block';
+        } else {
+          urlGroup.style.display = 'none';
+        }
+      }
+    }
 
     function populateAdminCourseSelector(selectedCode = '') {
       const select = document.getElementById('admin-select-course');
@@ -1902,7 +1948,9 @@
           salesDrill: '',
           homework: '',
           participants: '',
-          remarks: ''
+          remarks: '',
+          regStatus: '由經銷業務統一報名',
+          regUrl: ''
         });
       }
       
@@ -1938,6 +1986,9 @@
       document.getElementById('edit-homework').value = course.homework || '';
       document.getElementById('edit-participants').value = course.participants || '';
       document.getElementById('edit-remarks').value = course.remarks || '';
+      document.getElementById('edit-course-reg-status').value = course.regStatus || '由經銷業務統一報名';
+      document.getElementById('edit-course-reg-url').value = course.regUrl || '';
+      toggleCourseRegUrlField();
     }
 
     function onAdminSelectCourseChange() {
@@ -1961,6 +2012,8 @@
         course.homework = document.getElementById('edit-homework').value;
         course.participants = document.getElementById('edit-participants').value;
         course.remarks = document.getElementById('edit-remarks').value;
+        course.regStatus = document.getElementById('edit-course-reg-status').value;
+        course.regUrl = document.getElementById('edit-course-reg-url').value.trim();
         
         if (newCode && newCode !== currentEditingCourseCode) {
           currentEditingCourseCode = newCode;
@@ -1980,7 +2033,9 @@
         salesDrill: '',
         homework: '',
         participants: '',
-        remarks: ''
+        remarks: '',
+        regStatus: '由經銷業務統一報名',
+        regUrl: ''
       });
       populateAdminCourseSelector(newCode);
     }
