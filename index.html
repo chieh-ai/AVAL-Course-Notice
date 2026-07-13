@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>暐固科技 - Apple Sales Training 課程公告</title>
@@ -821,8 +820,11 @@
   </div>
 
   <script>
-    // 全域變數，由伺服器端範本插入
-    const isAdmin = <%= isAdmin %>;
+    // 配置您的 Google Apps Script Web App API 網址 (必填)
+    const API_URL = "https://script.google.com/macros/s/AKfycbwADOog_qCbV7Ucrp-dnLZ2xbc5sw1w4Zi6eELgB_3W1faIfUsn8F8jy69byQ2P-8BrhA/exec";
+    
+    // 解析網址的 ?admin=true 參數來控制管理員模式
+    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
     let selectedFile = null;
     let availableMonths = [];
     
@@ -840,12 +842,12 @@
       // 載入 Drive 資源
       loadDriveResources();
       
-      // 註冊 Drag & Drop 事件
+      // 註冊 Drag & Drop 拖放事件
       initDragAndDrop();
     };
 
     /**
-     * 從 Apps Script 後端讀取網頁主內容與事件
+     * 從 Apps Script 後端讀取網頁主內容與事件 (透過 fetch() API)
      */
     function loadPageContent(monthStr = null) {
       // 顯示加載骨架
@@ -854,8 +856,17 @@
       document.getElementById('details-loader').style.display = 'block';
       document.getElementById('details-table').style.display = 'none';
 
-      google.script.run
-        .withSuccessHandler(function(response) {
+      let requestUrl = `${API_URL}?action=getPageData&admin=${isAdmin}`;
+      if (monthStr) {
+        requestUrl += `&month=${monthStr}`;
+      }
+
+      fetch(requestUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP 錯誤: ' + response.status);
+          return response.json();
+        })
+        .then(response => {
           if (response.success) {
             renderPageDetails(response.config);
             
@@ -885,10 +896,9 @@
             alert('載入網頁內容失敗: ' + response.error);
           }
         })
-        .withFailureHandler(function(err) {
+        .catch(err => {
           alert('通訊失敗: ' + err.toString());
-        })
-        .getPageData(isAdmin, monthStr);
+        });
     }
 
     /**
@@ -899,8 +909,12 @@
       const container = document.getElementById('resource-container');
       container.innerHTML = '';
 
-      google.script.run
-        .withSuccessHandler(function(response) {
+      fetch(`${API_URL}?action=getResources`)
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP 錯誤: ' + response.status);
+          return response.json();
+        })
+        .then(response => {
           document.getElementById('resources-loader').style.display = 'none';
           if (response.success) {
             if (response.files.length === 0) {
@@ -930,11 +944,10 @@
             container.innerHTML = `<div style="font-size: 13px; color: var(--accent-red); text-align: center; padding: 20px;">載入教材失敗: ${response.error}</div>`;
           }
         })
-        .withFailureHandler(function(err) {
+        .catch(err => {
           document.getElementById('resources-loader').style.display = 'none';
           container.innerHTML = `<div style="font-size: 13px; color: var(--accent-red); text-align: center; padding: 20px;">連線失敗: ${err.toString()}</div>`;
-        })
-        .getSharedResources();
+        });
     }
 
     /**
@@ -1008,7 +1021,6 @@
         element.style.color = '#c0392b';
         element.style.backgroundColor = '#fde8e8';
       } else {
-        // 其他客製化文字
         element.innerText = val;
         element.style.width = 'auto';
         element.style.padding = '2px 8px';
@@ -1025,12 +1037,9 @@
       container.innerHTML = '';
       if (!text) return;
       
-      // 統一以換行切分，過濾掉多餘空白行
       const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
       lines.forEach(line => {
-        // 移除原有的 bullet point (• 或數字標號)
         let cleaned = line.replace(/^[•\-\d\.\s]+/, '');
-        
         const li = document.createElement('li');
         li.innerText = cleaned;
         container.appendChild(li);
@@ -1075,7 +1084,6 @@
     }
 
     function setUploadFile(file) {
-      // 限制 15MB 檔案大小
       const maxSize = 15 * 1024 * 1024;
       if (file.size > maxSize) {
         alert('檔案大小超過 15MB 限制，請壓縮後重新上傳。');
@@ -1141,7 +1149,6 @@
         return;
       }
 
-      // 顯示進度列
       const progressArea = document.getElementById('progress-area');
       const progressFill = document.getElementById('progress-fill');
       const statusMsg = document.getElementById('upload-status');
@@ -1151,10 +1158,8 @@
       statusMsg.className = 'status-message';
       statusMsg.innerText = '讀取檔案中...';
       
-      // 停用送出按鈕防止重複提交
       document.getElementById('submit-upload-btn').disabled = true;
 
-      // 讀取檔案轉換為 Base64
       const reader = new FileReader();
       
       reader.onload = function(evt) {
@@ -1163,31 +1168,46 @@
         
         const base64Data = evt.target.result.split(',')[1];
         
-        // 呼叫 GAS 後端
-        google.script.run
-          .withSuccessHandler(function(response) {
-            if (response.success) {
-              progressFill.style.width = '100%';
-              statusMsg.className = 'status-message status-success';
-              statusMsg.innerText = `✓ 上傳成功！已將「${response.fileName}」存入您的專屬資料夾。`;
-              
-              // 重設表單與選取檔案
-              document.getElementById('student-name').value = '';
-              removeSelectedFile();
-            } else {
-              progressFill.style.width = '0%';
-              statusMsg.className = 'status-message status-error';
-              statusMsg.innerText = `✕ 上傳失敗：${response.error}`;
-              document.getElementById('submit-upload-btn').disabled = false;
-            }
+        // 使用 fetch() POST 傳送 JSON 資料
+        fetch(API_URL, {
+          method: 'POST',
+          mode: 'cors', // 開啟跨域模式
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8' // GAS doPost 不支援 application/json 會觸發預檢，使用 text/plain 可簡化
+          },
+          body: JSON.stringify({
+            action: 'uploadFile',
+            studentName: studentName,
+            fileName: selectedFile.name,
+            base64Data: base64Data,
+            mimeType: selectedFile.type
           })
-          .withFailureHandler(function(err) {
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP 錯誤: ' + response.status);
+          return response.json();
+        })
+        .then(response => {
+          if (response.success) {
+            progressFill.style.width = '100%';
+            statusMsg.className = 'status-message status-success';
+            statusMsg.innerText = `✓ 上傳成功！已將「${response.fileName}」存入您的專屬資料夾。`;
+            
+            document.getElementById('student-name').value = '';
+            removeSelectedFile();
+          } else {
             progressFill.style.width = '0%';
             statusMsg.className = 'status-message status-error';
-            statusMsg.innerText = `✕ 系統連線發生錯誤，請稍後再試。`;
+            statusMsg.innerText = `✕ 上傳失敗：${response.error}`;
             document.getElementById('submit-upload-btn').disabled = false;
-          })
-          .uploadFile(studentName, selectedFile.name, base64Data, selectedFile.type);
+          }
+        })
+        .catch(err => {
+          progressFill.style.width = '0%';
+          statusMsg.className = 'status-message status-error';
+          statusMsg.innerText = `✕ 系統連線發生錯誤，請稍後再試。`;
+          document.getElementById('submit-upload-btn').disabled = false;
+        });
       };
       
       reader.onerror = function() {
@@ -1219,23 +1239,18 @@
       const year = parseInt(parts[0]);
       const month = parseInt(parts[1]);
       
-      // 計算當月第 1 天及星期幾
       const firstDay = new Date(year, month - 1, 1);
-      const startDayOfWeek = firstDay.getDay(); // 0:日, 1:一, 2:二, 3:三, 4:四, 5:五, 6:六
+      const startDayOfWeek = firstDay.getDay(); 
       
-      // 當月總天數
       const lastDay = new Date(year, month, 0);
       const totalDays = lastDay.getDate();
       
-      // 前一個月的最後幾天（填補月曆首行空白）
       const prevMonthLast = new Date(year, month - 1, 0);
       const prevMonthLastDay = prevMonthLast.getDate();
       
-      // 建立月曆表格
       const table = document.createElement('table');
       table.className = 'calendar-table';
       
-      // 渲染星期表頭
       const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
       const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
@@ -1248,8 +1263,6 @@
       table.appendChild(thead);
       
       const tbody = document.createElement('tbody');
-      
-      // 構造完整的「日曆格子陣列」（填滿整週，方便分列渲染）
       const gridDays = [];
       
       // 1. 填入上月剩餘日期
@@ -1258,7 +1271,7 @@
         gridDays.push({
           dayNum: d,
           isCurrentMonth: false,
-          dateStr: '' // 上月不判斷課程事件
+          dateStr: ''
         });
       }
       
@@ -1272,7 +1285,7 @@
         });
       }
       
-      // 3. 填入下月剩餘日期（補足最後一週）
+      // 3. 填入下月剩餘日期
       let nextMonthDay = 1;
       while (gridDays.length % 7 !== 0) {
         gridDays.push({
@@ -1291,7 +1304,6 @@
         while (i < 7) {
           const dayData = week[i];
           
-          // 非當月日期直接渲染普通灰格
           if (!dayData.isCurrentMonth) {
             const td = document.createElement('td');
             td.className = 'other-month-day';
@@ -1301,18 +1313,15 @@
             continue;
           }
           
-          // 搜尋此日期是否有課程事件
           const activeEvent = findEventForDate(dayData.dateStr, events);
           
           if (activeEvent) {
-            // 計算合併格長度 (span)：向後查找此週內有多少天是同一個事件且也是當月日期
             let span = 1;
             while (i + span < 7) {
               const nextDayData = week[i + span];
               if (!nextDayData.isCurrentMonth) break;
               const nextEvent = findEventForDate(nextDayData.dateStr, events);
               
-              // 若下個日期有相同的事件名稱，則納入合併
               if (nextEvent && nextEvent.name === activeEvent.name) {
                 span++;
               } else {
@@ -1320,19 +1329,16 @@
               }
             }
             
-            // 建立合併格
             const td = document.createElement('td');
             td.colSpan = span;
             td.className = 'calendar-event-cell';
             td.style.backgroundColor = activeEvent.color || '#e1e1e1';
             
-            // 收集合併格內所有日子的天數
             const daysInSpan = [];
             for (let s = 0; s < span; s++) {
               daysInSpan.push(week[i + s].dayNum);
             }
             
-            // 標示日期區間：例如 "1–5日"
             let dateLabel = daysInSpan.length > 1 
               ? `${daysInSpan[0]}–${daysInSpan[daysInSpan.length - 1]}日`
               : `${daysInSpan[0]}日`;
@@ -1344,7 +1350,6 @@
             tr.appendChild(td);
             i += span;
           } else {
-            // 普通當月無課日期
             const td = document.createElement('td');
             td.innerHTML = `<span class="day-number">${dayData.dayNum}</span>`;
             tr.appendChild(td);
@@ -1358,12 +1363,8 @@
       container.appendChild(table);
     }
 
-    /**
-     * 尋找特定日期對應的事件
-     */
     function findEventForDate(dateStr, events) {
       if (!dateStr || !events) return null;
-      // 比對日期：dateStr 是否落在事件的 [startDate, endDate] 區間內
       return events.find(e => dateStr >= e.startDate && dateStr <= e.endDate) || null;
     }
   </script>

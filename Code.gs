@@ -1,6 +1,6 @@
 /**
  * 暐固科技 Apple Sales Training 課程公告系統
- * 後端 Apps Script 程式碼
+ * 後端 Apps Script 程式碼 (RESTful JSON API 版本)
  */
 
 // 全域設定：Google Drive 資料夾 ID
@@ -20,184 +20,209 @@ function getSpreadsheet() {
 }
 
 /**
- * 網頁進入點
+ * API GET 請求入口
+ * 處理網頁資料讀取與資源清單查詢
  */
 function doGet(e) {
-  var template = HtmlService.createTemplateFromFile('Index');
+  var action = e.parameter.action;
+  var responseData;
   
-  // 檢查是否為管理員模式 (網址加入 ?admin=true)
-  var isAdmin = e.parameter.admin === 'true';
-  template.isAdmin = isAdmin;
-  
-  return template.evaluate()
-    .setTitle("暐固科技 - Apple Sales Training 課程公告")
-    .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-/**
- * 載入網頁所需的全部資料
- * @param {boolean} isAdmin 是否為管理員模式
- * @param {string} selectedMonth 選擇的年月 (格式: YYYY-MM)，選填
- */
-function getPageData(isAdmin, selectedMonth) {
   try {
     // 確保資料表已初始化
     initDatabase();
     
-    var ss = getSpreadsheet();
-    
-    // 1. 讀取 WebConfig 設定
-    var configSheet = ss.getSheetByName("WebConfig");
-    var configRows = configSheet.getDataRange().getValues();
-    var config = {};
-    for (var i = 1; i < configRows.length; i++) {
-      config[configRows[i][0]] = configRows[i][1];
+    if (action === "getPageData") {
+      var isAdmin = e.parameter.admin === 'true';
+      var selectedMonth = e.parameter.month;
+      responseData = getPageData(isAdmin, selectedMonth);
+    } 
+    else if (action === "getResources") {
+      responseData = getSharedResources();
+    } 
+    else {
+      responseData = { 
+        success: false, 
+        error: "未知的 GET 動作 (Action)。請指定 ?action=getPageData 或 ?action=getResources" 
+      };
     }
-    
-    // 2. 讀取月曆列表 (Calendars)
-    var calSheet = ss.getSheetByName("Calendars");
-    var calRows = calSheet.getDataRange().getValues();
-    var calendars = [];
-    var activeMonth = "";
-    
-    for (var i = 1; i < calRows.length; i++) {
-      var ym = calRows[i][0];
-      var status = calRows[i][1];
-      
-      // 轉換為前端顯示格式：如果是管理員或是啟用狀態才加入
-      if (status === "Active" || isAdmin) {
-        calendars.push({
-          yearMonth: ym,
-          status: status
-        });
-      }
-      
-      if (status === "Active" && !selectedMonth) {
-        activeMonth = ym;
-      }
-    }
-    
-    // 決定要查詢的月份
-    var targetMonth = selectedMonth || activeMonth;
-    if (!targetMonth && calendars.length > 0) {
-      targetMonth = calendars[0].yearMonth;
-    }
-    
-    // 3. 讀取選定月份的課程事件 (CalendarEvents)
-    var eventSheet = ss.getSheetByName("CalendarEvents");
-    var eventRows = eventSheet.getDataRange().getValues();
-    var events = [];
-    
-    for (var i = 1; i < eventRows.length; i++) {
-      if (eventRows[i][0] === targetMonth) {
-        events.push({
-          startDate: formatDateString(eventRows[i][1]),
-          endDate: formatDateString(eventRows[i][2]),
-          name: eventRows[i][3],
-          color: eventRows[i][4]
-        });
-      }
-    }
-    
-    return {
-      success: true,
-      config: config,
-      calendars: calendars,
-      activeMonth: targetMonth,
-      events: events
-    };
   } catch (error) {
-    return { success: false, error: error.toString() };
+    responseData = { success: false, error: error.toString() };
   }
+  
+  // 以 JSON 格式輸出，GAS 會自動附加對應的 CORS 標頭與處理轉址
+  return ContentService.createTextOutput(JSON.stringify(responseData))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * API POST 請求入口
+ * 處理學生作業上傳（以 JSON Payload 傳遞）
+ */
+function doPost(e) {
+  var responseData;
+  
+  try {
+    // 確保資料表已初始化
+    initDatabase();
+    
+    // 解析 POST 傳入的 JSON 內容
+    var postData = JSON.parse(e.postData.contents);
+    var action = postData.action;
+    
+    if (action === "uploadFile") {
+      var studentName = postData.studentName;
+      var fileName = postData.fileName;
+      var base64Data = postData.base64Data;
+      var mimeType = postData.mimeType;
+      
+      responseData = uploadFile(studentName, fileName, base64Data, mimeType);
+    } 
+    else {
+      responseData = { success: false, error: "未知的 POST 動作 (Action)" };
+    }
+  } catch (error) {
+    responseData = { success: false, error: "POST 請求解析錯誤: " + error.toString() };
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(responseData))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 載入網頁所需的全部資料
+ */
+function getPageData(isAdmin, selectedMonth) {
+  var ss = getSpreadsheet();
+  
+  // 1. 讀取 WebConfig 設定
+  var configSheet = ss.getSheetByName("WebConfig");
+  var configRows = configSheet.getDataRange().getValues();
+  var config = {};
+  for (var i = 1; i < configRows.length; i++) {
+    config[configRows[i][0]] = configRows[i][1];
+  }
+  
+  // 2. 讀取月曆列表 (Calendars)
+  var calSheet = ss.getSheetByName("Calendars");
+  var calRows = calSheet.getDataRange().getValues();
+  var calendars = [];
+  var activeMonth = "";
+  
+  for (var i = 1; i < calRows.length; i++) {
+    var ym = calRows[i][0];
+    var status = calRows[i][1];
+    
+    if (status === "Active" || isAdmin) {
+      calendars.push({
+        yearMonth: ym,
+        status: status
+      });
+    }
+    
+    if (status === "Active" && !selectedMonth) {
+      activeMonth = ym;
+    }
+  }
+  
+  var targetMonth = selectedMonth || activeMonth;
+  if (!targetMonth && calendars.length > 0) {
+    targetMonth = calendars[0].yearMonth;
+  }
+  
+  // 3. 讀取選定月份的課程事件 (CalendarEvents)
+  var eventSheet = ss.getSheetByName("CalendarEvents");
+  var eventRows = eventSheet.getDataRange().getValues();
+  var events = [];
+  
+  for (var i = 1; i < eventRows.length; i++) {
+    if (eventRows[i][0] === targetMonth) {
+      events.push({
+        startDate: formatDateString(eventRows[i][1]),
+        endDate: formatDateString(eventRows[i][2]),
+        name: eventRows[i][3],
+        color: eventRows[i][4]
+      });
+    }
+  }
+  
+  return {
+    success: true,
+    config: config,
+    calendars: calendars,
+    activeMonth: targetMonth,
+    events: events
+  };
 }
 
 /**
  * 讀取共享資源 (Resource) 資料夾中的檔案清單
  */
 function getSharedResources() {
-  try {
-    var folder = DriveApp.getFolderById(RESOURCE_FOLDER_ID);
-    var files = folder.getFiles();
-    var list = [];
-    
-    while (files.hasNext()) {
-      var file = files.next();
-      list.push({
-        id: file.getId(),
-        name: file.getName(),
-        url: file.getUrl(),
-        downloadUrl: "https://drive.google.com/uc?export=download&id=" + file.getId(),
-        size: formatBytes(file.getSize()),
-        mimeType: file.getMimeType(),
-        updated: Utilities.formatDate(file.getLastUpdated(), "GMT+8", "yyyy/MM/dd")
-      });
-    }
-    
-    return { success: true, files: list };
-  } catch (error) {
-    return { success: false, error: error.toString() };
+  var folder = DriveApp.getFolderById(RESOURCE_FOLDER_ID);
+  var files = folder.getFiles();
+  var list = [];
+  
+  while (files.hasNext()) {
+    var file = files.next();
+    list.push({
+      id: file.getId(),
+      name: file.getName(),
+      url: file.getUrl(),
+      downloadUrl: "https://drive.google.com/uc?export=download&id=" + file.getId(),
+      size: formatBytes(file.getSize()),
+      mimeType: file.getMimeType(),
+      updated: Utilities.formatDate(file.getLastUpdated(), "GMT+8", "yyyy/MM/dd")
+    });
   }
+  
+  return { success: true, files: list };
 }
 
 /**
  * 處理學生作業上傳
- * @param {string} studentName 學生中文全名
- * @param {string} fileName 檔案名稱
- * @param {string} base64Data Base64 編碼的檔案內容
- * @param {string} mimeType 檔案的 Mime Type
  */
 function uploadFile(studentName, fileName, base64Data, mimeType) {
-  try {
-    // 驗證輸入
-    if (!studentName || studentName.trim() === "") {
-      throw new Error("請輸入您的中文全名");
-    }
-    if (!fileName || !base64Data) {
-      throw new Error("未選取上傳檔案或檔案為空");
-    }
-    
-    studentName = studentName.trim();
-    var parentFolder = DriveApp.getFolderById(UPLOAD_FOLDER_ID);
-    
-    // 搜尋有無同名的學生資料夾
-    var studentFolder;
-    var subFolders = parentFolder.getFoldersByName(studentName);
-    if (subFolders.hasNext()) {
-      studentFolder = subFolders.next();
-    } else {
-      // 建立學生專屬資料夾
-      studentFolder = parentFolder.createFolder(studentName);
-    }
-    
-    // 解碼並建立檔案
-    var decodedData = Utilities.base64Decode(base64Data);
-    var blob = Utilities.newBlob(decodedData, mimeType, fileName);
-    var file = studentFolder.createFile(blob);
-    
-    // 將紀錄寫入 Google Sheet (UploadLogs)
-    var ss = getSpreadsheet();
-    var logSheet = ss.getSheetByName("UploadLogs");
-    logSheet.appendRow([
-      new Date(),
-      studentName,
-      fileName,
-      file.getUrl(),
-      studentFolder.getUrl()
-    ]);
-    
-    return {
-      success: true,
-      fileName: fileName,
-      fileUrl: file.getUrl()
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.toString()
-    };
+  if (!studentName || studentName.trim() === "") {
+    throw new Error("請輸入您的中文全名");
   }
+  if (!fileName || !base64Data) {
+    throw new Error("未選取上傳檔案或檔案為空");
+  }
+  
+  studentName = studentName.trim();
+  var parentFolder = DriveApp.getFolderById(UPLOAD_FOLDER_ID);
+  
+  // 搜尋有無同名的學生資料夾
+  var studentFolder;
+  var subFolders = parentFolder.getFoldersByName(studentName);
+  if (subFolders.hasNext()) {
+    studentFolder = subFolders.next();
+  } else {
+    // 建立學生專屬資料夾
+    studentFolder = parentFolder.createFolder(studentName);
+  }
+  
+  // 解碼並建立檔案
+  var decodedData = Utilities.base64Decode(base64Data);
+  var blob = Utilities.newBlob(decodedData, mimeType, fileName);
+  var file = studentFolder.createFile(blob);
+  
+  // 將紀錄寫入 Google Sheet (UploadLogs)
+  var ss = getSpreadsheet();
+  var logSheet = ss.getSheetByName("UploadLogs");
+  logSheet.appendRow([
+    new Date(),
+    studentName,
+    fileName,
+    file.getUrl(),
+    studentFolder.getUrl()
+  ]);
+  
+  return {
+    success: true,
+    fileName: fileName,
+    fileUrl: file.getUrl()
+  };
 }
 
 /**
@@ -242,11 +267,8 @@ function initDatabase() {
   if (!calListSheet) {
     calListSheet = ss.insertSheet("Calendars");
     calListSheet.appendRow(["YearMonth", "Status"]);
-    
-    // 預設資料：2026 年 6 月設為 Active (啟用)，2026 年 5 月設為 Archived (封存) 以供測試
     calListSheet.appendRow(["2026-06", "Active"]);
     calListSheet.appendRow(["2026-05", "Archived"]);
-    
     calListSheet.getRange(1, 1, 1, 2).setFontWeight("bold").setBackground("#f3f3f3");
     calListSheet.autoResizeColumns(1, 2);
   }
@@ -257,14 +279,12 @@ function initDatabase() {
     calEventsSheet = ss.insertSheet("CalendarEvents");
     calEventsSheet.appendRow(["YearMonth", "StartDate", "EndDate", "EventName", "Color"]);
     
-    // 預設事件：June 2026 的工作日
     var defaultEvents = [
       ["2026-06", "2026-06-01", "2026-06-05", "Apple Sales Training", "#e1e1e1"],
       ["2026-06", "2026-06-08", "2026-06-12", "Apple Sales Training", "#e1e1e1"],
       ["2026-06", "2026-06-15", "2026-06-19", "Apple Sales Training", "#e1e1e1"],
       ["2026-06", "2026-06-22", "2026-06-26", "Apple Sales Training", "#e1e1e1"],
       ["2026-06", "2026-06-29", "2026-07-03", "AVAL Level 0 for Sales Training (AF01)", "#ffcccc"],
-      // 封存的 5 月事件 (測試用)
       ["2026-05", "2026-05-11", "2026-05-15", "Apple Sales Training (Archived Demo)", "#e1e1e1"]
     ];
     
@@ -303,8 +323,6 @@ function formatDateString(date) {
   if (date instanceof Date) {
     return Utilities.formatDate(date, "GMT+8", "yyyy-MM-dd");
   }
-  
-  // 如果是 ISO 字串或物件字串
   var str = date.toString();
   if (str.indexOf("GMT") !== -1 || str.indexOf("T") !== -1) {
     return Utilities.formatDate(new Date(str), "GMT+8", "yyyy-MM-dd");
