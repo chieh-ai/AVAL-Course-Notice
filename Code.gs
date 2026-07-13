@@ -161,7 +161,7 @@ function getPageData(isAdmin, selectedMonth) {
       allMonthsMap[m] = { yearMonth: m, status: "Active" };
     });
     for (var i = 1; i < eventRows.length; i++) {
-      var ym = eventRows[i][0];
+      var ym = formatYearMonth(eventRows[i][0]);
       if (ym) {
         if (!allMonthsMap.hasOwnProperty(ym)) {
           allMonthsMap[ym] = { yearMonth: ym, status: "Archived" };
@@ -203,7 +203,7 @@ function getPageData(isAdmin, selectedMonth) {
   var events = [];
   
   for (var i = 1; i < eventRows.length; i++) {
-    if (eventRows[i][0] === targetMonth) {
+    if (formatYearMonth(eventRows[i][0]) === targetMonth) {
       var eventStart = formatDateString(eventRows[i][1]);
       var eventEnd = formatDateString(eventRows[i][2]);
       
@@ -396,6 +396,7 @@ function initDatabase() {
   var hasStartDateKey = false;
   var hasEndDateKey = false;
   var hasLocRemarksKey = false;
+  var hasLocClassroomKey = false;
   var data = configSheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     var key = data[i][0];
@@ -405,6 +406,7 @@ function initDatabase() {
     if (key === "calendar_start_date") hasStartDateKey = true;
     if (key === "calendar_end_date") hasEndDateKey = true;
     if (key === "location_remarks") hasLocRemarksKey = true;
+    if (key === "location_classroom") hasLocClassroomKey = true;
   }
   
   var needsResize = false;
@@ -430,6 +432,10 @@ function initDatabase() {
   }
   if (!hasLocRemarksKey) {
     configSheet.appendRow(["location_remarks", "進遠東園區後右側電梯上樓", "上課地點備註"]);
+    needsResize = true;
+  }
+  if (!hasLocClassroomKey) {
+    configSheet.appendRow(["location_classroom", "906 會議室", "上課地點教室"]);
     needsResize = true;
   }
   
@@ -462,6 +468,24 @@ function formatDateString(date) {
     return Utilities.formatDate(new Date(str), "GMT+8", "yyyy-MM-dd");
   }
   return str.split(" ")[0];
+}
+
+/**
+ * 輔助函數：日期轉成 YYYY-MM 格式字串，容錯處理 Date 與 String
+ */
+function formatYearMonth(val) {
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, "GMT+8", "yyyy-MM");
+  }
+  if (!val) return "";
+  var str = val.toString().trim();
+  if (str.indexOf("GMT") !== -1 || str.indexOf("T") !== -1) {
+    return Utilities.formatDate(new Date(str), "GMT+8", "yyyy-MM");
+  }
+  if (str.length >= 7) {
+    return str.substring(0, 7);
+  }
+  return str;
 }
 
 /**
@@ -517,7 +541,7 @@ function saveCalendarEvents(yearMonth, eventsData) {
     
     // 保留非本月事件，剔除本月事件以進行覆寫
     for (var i = 1; i < values.length; i++) {
-      if (values[i][0] !== yearMonth) {
+      if (formatYearMonth(values[i][0]) !== yearMonth) {
         newValues.push(values[i]);
       }
     }

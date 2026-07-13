@@ -1175,7 +1175,8 @@
         <!-- 區塊：上課地點與地圖 -->
         <section id="location-section" class="card">
           <div class="card-title">上課地點</div>
-          <div id="location-address" style="font-size: 14px; font-weight: 500;"></div>
+          <div id="location-address" style="font-size: 14px; font-weight: 600; margin-bottom: 4px;"></div>
+          <div id="location-classroom" style="font-size: 14px; font-weight: 500; margin-bottom: 4px;"></div>
           <div id="location-remarks" style="display: none;"></div>
           <div class="map-container">
             <iframe id="map-iframe" src=""></iframe>
@@ -1351,9 +1352,13 @@
                   <input type="text" id="edit-location" required>
                 </div>
                 <div class="form-group">
-                  <label for="edit-location-remarks">上課地點備註</label>
-                  <input type="text" id="edit-location-remarks">
+                  <label for="edit-location-classroom">上課教室</label>
+                  <input type="text" id="edit-location-classroom">
                 </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-location-remarks">上課地點備註</label>
+                <input type="text" id="edit-location-remarks">
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -1745,8 +1750,16 @@
       
       // 上課地點與地圖
       const location = config.location || '';
+      const classroom = config.location_classroom || '';
       const locRemarks = config.location_remarks || '';
       document.getElementById('location-address').innerText = '地址：' + location;
+      const classroomEl = document.getElementById('location-classroom');
+      if (classroom) {
+        classroomEl.innerText = '教室：' + classroom;
+        classroomEl.style.display = 'block';
+      } else {
+        classroomEl.style.display = 'none';
+      }
       const remarksEl = document.getElementById('location-remarks');
       if (locRemarks) {
         remarksEl.innerText = '備註：' + locRemarks;
@@ -2032,12 +2045,19 @@
       const gridDays = [];
       
       // 1. 填入上月剩餘日期
+      let prevYear = year;
+      let prevMonth = month - 1;
+      if (prevMonth === 0) {
+        prevMonth = 12;
+        prevYear = year - 1;
+      }
       for (let i = startDayOfWeek - 1; i >= 0; i--) {
         const d = prevMonthLastDay - i;
+        const dStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         gridDays.push({
           dayNum: d,
           isCurrentMonth: false,
-          dateStr: ''
+          dateStr: dStr
         });
       }
       
@@ -2052,12 +2072,19 @@
       }
       
       // 3. 填入下月剩餘日期
+      let nextYear = year;
+      let nextMonth = month + 1;
+      if (nextMonth === 13) {
+        nextMonth = 1;
+        nextYear = year + 1;
+      }
       let nextMonthDay = 1;
       while (gridDays.length % 7 !== 0) {
+        const dStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(nextMonthDay).padStart(2, '0')}`;
         gridDays.push({
           dayNum: nextMonthDay++,
           isCurrentMonth: false,
-          dateStr: ''
+          dateStr: dStr
         });
       }
       
@@ -2073,7 +2100,11 @@
           if (!dayData.isCurrentMonth) {
             const td = document.createElement('td');
             td.className = 'other-month-day';
-            td.innerHTML = `<span class="day-number">${dayData.dayNum}</span>`;
+            let displayText = dayData.dayNum;
+            if (dayData.dayNum === 1 && dayData.dateStr) {
+              displayText = parseInt(dayData.dateStr.split('-')[1]) + '/1';
+            }
+            td.innerHTML = `<span class="day-number">${displayText}</span>`;
             tr.appendChild(td);
             i++;
             continue;
@@ -2101,13 +2132,39 @@
             td.style.backgroundColor = activeEvent.color || '#e1e1e1';
             
             const daysInSpan = [];
+            let hasFirst = false;
             for (let s = 0; s < span; s++) {
-              daysInSpan.push(week[i + s].dayNum);
+              const wd = week[i + s];
+              daysInSpan.push(wd.dayNum);
+              if (wd.dayNum === 1) {
+                hasFirst = true;
+              }
             }
             
-            let dateLabel = daysInSpan.length > 1 
-              ? `${daysInSpan[0]}–${daysInSpan[daysInSpan.length - 1]}日`
-              : `${daysInSpan[0]}日`;
+            let dateLabel = '';
+            const startDay = week[i];
+            const endDay = week[i + span - 1];
+            
+            if (startDay.dateStr && endDay.dateStr) {
+              const startParts = startDay.dateStr.split('-');
+              const endParts = endDay.dateStr.split('-');
+              const startM = parseInt(startParts[1]);
+              const startD = parseInt(startParts[2]);
+              const endM = parseInt(endParts[1]);
+              const endD = parseInt(endParts[2]);
+              
+              if (startM !== endM) {
+                dateLabel = `${startM}/${startD}–${endM}/${endD}`;
+              } else if (hasFirst || startD === 1) {
+                dateLabel = span > 1 ? `${startM}/${startD}–${endD}日` : `${startM}/${startD}`;
+              } else {
+                dateLabel = span > 1 ? `${startD}–${endD}日` : `${startD}日`;
+              }
+            } else {
+              dateLabel = daysInSpan.length > 1 
+                ? `${daysInSpan[0]}–${daysInSpan[daysInSpan.length - 1]}日`
+                : `${daysInSpan[0]}日`;
+            }
               
             td.innerHTML = `
               <div class="event-date-label">${dateLabel}</div>
@@ -2117,7 +2174,11 @@
             i += span;
           } else {
             const td = document.createElement('td');
-            td.innerHTML = `<span class="day-number">${dayData.dayNum}</span>`;
+            let displayText = dayData.dayNum;
+            if (dayData.dayNum === 1 && dayData.dateStr) {
+              displayText = parseInt(dayData.dateStr.split('-')[1]) + '/1';
+            }
+            td.innerHTML = `<span class="day-number">${displayText}</span>`;
             tr.appendChild(td);
             i++;
           }
@@ -2208,6 +2269,7 @@
       document.getElementById('edit-participants').value = gConfig.participants || '';
       document.getElementById('edit-remarks').value = gConfig.remarks || '';
       document.getElementById('edit-location').value = gConfig.location || '';
+      document.getElementById('edit-location-classroom').value = gConfig.location_classroom || '';
       document.getElementById('edit-location-remarks').value = gConfig.location_remarks || '';
       document.getElementById('edit-reg-text').value = gConfig.registration_text || '';
       document.getElementById('edit-reg-url').value = gConfig.registration_url || '';
@@ -2238,6 +2300,7 @@
         participants: document.getElementById('edit-participants').value,
         remarks: document.getElementById('edit-remarks').value,
         location: document.getElementById('edit-location').value,
+        location_classroom: document.getElementById('edit-location-classroom').value,
         location_remarks: document.getElementById('edit-location-remarks').value,
         registration_text: document.getElementById('edit-reg-text').value,
         registration_url: document.getElementById('edit-reg-url').value,
