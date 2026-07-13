@@ -138,8 +138,10 @@ function getPageData(isAdmin, selectedMonth) {
   }
   
   // 2. 獲取行事曆月份列表 (動態由週期區間與資料庫事件計算得出)
-  var startMonth = config.calendar_start_month || "2026-06";
-  var endMonth = config.calendar_end_month || "2026-07";
+  var startDate = config.calendar_start_date || "2026-06-29";
+  var endDate = config.calendar_end_date || "2026-07-03";
+  var startMonth = startDate.substring(0, 7);
+  var endMonth = endDate.substring(0, 7);
   
   var configuredMonths = getMonthsInRange(startMonth, endMonth);
   var calendars = [];
@@ -193,15 +195,30 @@ function getPageData(isAdmin, selectedMonth) {
   var targetMonth = activeMonth;
   
   // 3. 讀取選定月份的課程事件 (CalendarEvents)
-  var eventSheet = ss.getSheetByName("CalendarEvents");
-  var eventRows = eventSheet.getDataRange().getValues();
   var events = [];
   
   for (var i = 1; i < eventRows.length; i++) {
     if (eventRows[i][0] === targetMonth) {
+      var eventStart = formatDateString(eventRows[i][1]);
+      var eventEnd = formatDateString(eventRows[i][2]);
+      
+      if (!isAdmin) {
+        // 一般使用者只可以看到行事曆設定區間內的事件
+        if (eventStart > endDate || eventEnd < startDate) {
+          continue; // 不在區間內，跳過
+        }
+        // 裁切事件區間以符合前台顯示週期
+        if (eventStart < startDate) {
+          eventStart = startDate;
+        }
+        if (eventEnd > endDate) {
+          eventEnd = endDate;
+        }
+      }
+      
       events.push({
-        startDate: formatDateString(eventRows[i][1]),
-        endDate: formatDateString(eventRows[i][2]),
+        startDate: eventStart,
+        endDate: eventEnd,
         name: eventRows[i][3],
         color: eventRows[i][4]
       });
@@ -367,16 +384,22 @@ function initDatabase() {
     uploadLogsSheet.autoResizeColumns(1, 5);
   }
   
-  // 5. 確保 admin_password, calendar_start_month, calendar_end_month 鍵存在於 WebConfig
+  // 5. 確保 admin_password, calendar_start_month, calendar_end_month, calendar_start_date, calendar_end_date, location_remarks 鍵存在於 WebConfig
   var hasPasswordKey = false;
   var hasStartKey = false;
   var hasEndKey = false;
+  var hasStartDateKey = false;
+  var hasEndDateKey = false;
+  var hasLocRemarksKey = false;
   var data = configSheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     var key = data[i][0];
     if (key === "admin_password") hasPasswordKey = true;
     if (key === "calendar_start_month") hasStartKey = true;
     if (key === "calendar_end_month") hasEndKey = true;
+    if (key === "calendar_start_date") hasStartDateKey = true;
+    if (key === "calendar_end_date") hasEndDateKey = true;
+    if (key === "location_remarks") hasLocRemarksKey = true;
   }
   
   var needsResize = false;
@@ -390,6 +413,18 @@ function initDatabase() {
   }
   if (!hasEndKey) {
     configSheet.appendRow(["calendar_end_month", "2026-07", "行事曆顯示週期結束月份"]);
+    needsResize = true;
+  }
+  if (!hasStartDateKey) {
+    configSheet.appendRow(["calendar_start_date", "2026-06-29", "行事曆顯示週期開始日期"]);
+    needsResize = true;
+  }
+  if (!hasEndDateKey) {
+    configSheet.appendRow(["calendar_end_date", "2026-07-03", "行事曆顯示週期結束日期"]);
+    needsResize = true;
+  }
+  if (!hasLocRemarksKey) {
+    configSheet.appendRow(["location_remarks", "進遠東園區後右側電梯上樓", "上課地點備註"]);
     needsResize = true;
   }
   
