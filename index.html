@@ -1139,6 +1139,164 @@
         padding: 8px 12px;
       }
     }
+
+    /* ==========================================================================
+       11. 課程資訊列印與 PDF 匯出專用樣式 (@media print)
+       ========================================================================== */
+    #print-container {
+      display: none;
+    }
+
+    #btn-print-course {
+      transition: all 0.2s ease;
+    }
+
+    #btn-print-course:hover {
+      background-color: #fafafa !important;
+      border-color: #777 !important;
+      color: #000 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+      transform: translateY(-1px);
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+      }
+
+      html, body {
+        background: #ffffff !important;
+        color: #111111 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* 隱藏除了列印容器以外的所有主體標籤 */
+      body > *:not(#print-container) {
+        display: none !important;
+      }
+
+      #print-container {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .print-doc {
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .print-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
+        padding-bottom: 12px !important;
+        border-bottom: 2px solid #1d1d1f !important;
+        margin-bottom: 16px !important;
+      }
+
+      .print-logo {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #1d1d1f !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 4px !important;
+      }
+
+      .print-title {
+        font-size: 21px !important;
+        font-weight: 800 !important;
+        color: #1d1d1f !important;
+        letter-spacing: 0.5px !important;
+      }
+
+      .print-header-right {
+        text-align: right !important;
+      }
+
+      .print-code-badge {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        padding: 4px 10px !important;
+        border: 1.5px solid #1d1d1f !important;
+        border-radius: 6px !important;
+        display: inline-block !important;
+        margin-bottom: 4px !important;
+        font-family: ui-monospace, Menlo, Monaco, monospace !important;
+      }
+
+      .print-meta-date {
+        font-size: 11px !important;
+        color: #555555 !important;
+      }
+
+      .print-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-bottom: 18px !important;
+      }
+
+      .print-table th, .print-table td {
+        border: 1px solid #d2d2d7 !important;
+        padding: 9px 12px !important;
+        vertical-align: top !important;
+        font-size: 12.5px !important;
+        line-height: 1.5 !important;
+      }
+
+      .print-table th {
+        background-color: #f5f5f7 !important;
+        font-weight: 600 !important;
+        color: #1d1d1f !important;
+        text-align: left !important;
+      }
+
+      .print-highlight-text {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+      }
+
+      .print-list {
+        margin: 0 !important;
+        padding-left: 18px !important;
+      }
+
+      .print-list li {
+        margin-bottom: 3px !important;
+      }
+
+      .print-footer {
+        border-top: 1px solid #e5e5ea !important;
+        padding-top: 12px !important;
+        margin-top: 20px !important;
+        font-size: 11.5px !important;
+        color: #555555 !important;
+        page-break-inside: avoid !important;
+      }
+
+      .print-footer-contact {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #1d1d1f !important;
+        margin-bottom: 6px !important;
+      }
+
+      .print-footer-notice {
+        font-size: 11px !important;
+        color: #86868b !important;
+      }
+
+      a[href]:after {
+        content: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1239,6 +1397,13 @@
               </td>
             </tr>
           </table>
+
+          <!-- 課程詳細說明底部動作列 (列印 / 匯出 PDF) -->
+          <div id="details-action-bar" style="display: none; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); justify-content: flex-end; align-items: center;">
+            <button type="button" id="btn-print-course" class="btn btn-secondary" onclick="printCourseDetails()" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #ffffff; color: var(--text-main); cursor: pointer;">
+              <span>🖨️</span> <span>課程資訊</span>
+            </button>
+          </div>
         </section>
 
       </div>
@@ -1334,6 +1499,70 @@
   <!-- 固定在最下方的聯絡資訊欄 -->
   <div class="fixed-footer" id="fixed-footer-bar">
     <span id="footer-contact-info">載入中...</span>
+  </div>
+
+  <!-- ==========================================================================
+       列印 / 另存 PDF 專用版面 (一般狀態隱藏，@media print 時單獨呈現)
+       ========================================================================== -->
+  <div id="print-container">
+    <div class="print-doc">
+      <div class="print-header">
+        <div class="print-header-left">
+          <div class="print-logo"> AVAL Technologies 暐固科技</div>
+          <div class="print-title">課程培訓通知暨受訓證明</div>
+        </div>
+        <div class="print-header-right">
+          <div class="print-code-badge" id="print-course-code"></div>
+          <div class="print-meta-date" id="print-doc-date"></div>
+        </div>
+      </div>
+      
+      <table class="print-table">
+        <tbody>
+          <tr>
+            <th style="width: 18%;">課程名稱</th>
+            <td colspan="3" class="print-highlight-text" id="print-course-name"></td>
+          </tr>
+          <tr>
+            <th>受訓學員</th>
+            <td colspan="3" id="print-participants" style="font-weight: 500;"></td>
+          </tr>
+          <tr>
+            <th style="width: 18%;">上課日期</th>
+            <td style="width: 32%;" id="print-class-date"></td>
+            <th style="width: 18%;">上課時間</th>
+            <td style="width: 32%;" id="print-class-time"></td>
+          </tr>
+          <tr>
+            <th>上課地點</th>
+            <td colspan="3" id="print-location"></td>
+          </tr>
+          <tr>
+            <th>考核機制</th>
+            <td colspan="3" id="print-assessments"></td>
+          </tr>
+          <tr>
+            <th>課程培訓大綱</th>
+            <td colspan="3">
+              <ul class="print-list" id="print-outline"></ul>
+            </td>
+          </tr>
+          <tr>
+            <th>備註事項</th>
+            <td colspan="3">
+              <ul class="print-list" id="print-remarks"></ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="print-footer">
+        <div class="print-footer-contact" id="print-contact-info"></div>
+        <div class="print-footer-notice">
+          ※ 本文件由 AVAL Technologies 訓練管理系統產生，供學員作為教育訓練受訓、請款報帳與假勤核准之證明文件。
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ==========================================================================
@@ -1606,6 +1835,7 @@
      let gCalendars = []; 
      let gCourses = []; 
     let currentSelectedMonth = ""; 
+    let currentActiveCourse = null; 
     
     // 初始化網頁
     window.onload = function() {
@@ -1733,6 +1963,8 @@
       document.getElementById('calendar-container').innerHTML = '';
       document.getElementById('details-loader').style.display = 'block';
       document.getElementById('details-table').style.display = 'none';
+      const detailsActionBar = document.getElementById('details-action-bar');
+      if (detailsActionBar) detailsActionBar.style.display = 'none';
 
       let requestUrl = `${API_URL}?action=getPageData&admin=${isAdmin}`;
       if (monthStr) {
@@ -1934,6 +2166,14 @@
       } else {
         btnReg.style.display = 'none';
       }
+
+      // 保存目前選中之課程並更新列印/匯出版面
+      currentActiveCourse = course;
+      const detailsActionBar = document.getElementById('details-action-bar');
+      if (detailsActionBar) {
+        detailsActionBar.style.display = 'flex';
+      }
+      updatePrintContainer(course);
       
       // 添加淡入淡出動畫效果，讓細節切換看起來非常優雅
       const detailsSection = document.getElementById('details-section');
@@ -1944,6 +2184,126 @@
           detailsSection.style.opacity = '1';
         });
       }
+    }
+
+    /**
+     * 更新列印與另存 PDF 專用版面內容
+     */
+    function updatePrintContainer(course) {
+      if (!course) return;
+
+      const codeEl = document.getElementById('print-course-code');
+      if (codeEl) codeEl.innerText = course.code || '';
+
+      const nameEl = document.getElementById('print-course-name');
+      if (nameEl) nameEl.innerText = course.name || '';
+
+      const dateEl = document.getElementById('print-class-date');
+      if (dateEl) dateEl.innerText = course.classDate || '依公告為準';
+
+      const timeEl = document.getElementById('print-class-time');
+      if (timeEl) timeEl.innerText = course.classTime || '依公告為準';
+
+      const locEl = document.getElementById('print-location');
+      if (locEl) {
+        let locText = (gConfig.location || '新北市新店區中正路 535 號').trim();
+        if (course.classroom && course.classroom.trim().length > 0) {
+          locText += `（${course.classroom.trim()}）`;
+        }
+        if (gConfig.location_remarks && gConfig.location_remarks.trim().length > 0) {
+          locText += ` — ${gConfig.location_remarks.trim()}`;
+        }
+        locEl.innerText = locText;
+      }
+
+      const assessEl = document.getElementById('print-assessments');
+      if (assessEl) {
+        const hasDrill = course.salesDrill && course.salesDrill.trim().length > 0;
+        const hasHw = course.homework && course.homework.trim().length > 0;
+        const items = [];
+        if (hasDrill) items.push('• 銷售演練：已列入課堂考核');
+        if (hasHw) items.push('• 課後作業：需於規定期限內完成繳交');
+        if (items.length === 0) items.push('無特別指定考核');
+        assessEl.innerHTML = items.join(' &nbsp;&nbsp;|&nbsp;&nbsp; ');
+      }
+
+      const partEl = document.getElementById('print-participants');
+      if (partEl) {
+        const partRaw = (course.participants || '').trim();
+        if (partRaw) {
+          const parts = partRaw.split('\n').map(s => s.trim()).filter(Boolean);
+          partEl.innerHTML = parts.join(' &nbsp;、&nbsp; ');
+        } else {
+          partEl.innerText = '全體受訓學員';
+        }
+      }
+
+      const outlineEl = document.getElementById('print-outline');
+      if (outlineEl) {
+        outlineEl.innerHTML = '';
+        const items = (course.outline || '').split('\n').map(s => s.trim()).filter(Boolean);
+        if (items.length > 0) {
+          items.forEach(it => {
+            const li = document.createElement('li');
+            li.innerText = it;
+            outlineEl.appendChild(li);
+          });
+        } else {
+          outlineEl.innerHTML = '<li>課程大綱詳見現場講義</li>';
+        }
+      }
+
+      const remarksEl = document.getElementById('print-remarks');
+      if (remarksEl) {
+        remarksEl.innerHTML = '';
+        const items = (course.remarks || '').split('\n').map(s => s.trim()).filter(Boolean);
+        if (items.length > 0) {
+          items.forEach(it => {
+            const li = document.createElement('li');
+            li.innerText = it;
+            remarksEl.appendChild(li);
+          });
+        } else {
+          remarksEl.innerHTML = '<li>無特定備註事項</li>';
+        }
+      }
+
+      const docDateEl = document.getElementById('print-doc-date');
+      if (docDateEl) {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        docDateEl.innerText = `列印日期：${yyyy}/${mm}/${dd}`;
+      }
+
+      const contactEl = document.getElementById('print-contact-info');
+      if (contactEl) {
+        const contactRaw = (gConfig.contact_info || '').trim();
+        contactEl.innerText = contactRaw ? `主辦窗口：${contactRaw}` : '主辦窗口：暐固科技 業務行銷處 吳俊頡 副理 | 02-22186188 | chieh.wu@senao.com.tw';
+      }
+    }
+
+    /**
+     * 列印或另存目前選定課程資訊為 PDF
+     */
+    function printCourseDetails() {
+      if (!currentActiveCourse) {
+        alert('尚未選取任何課程資訊，請先於課程表選擇課程');
+        return;
+      }
+      updatePrintContainer(currentActiveCourse);
+      
+      const originalTitle = document.title;
+      const code = currentActiveCourse.code ? `${currentActiveCourse.code} ` : '';
+      const name = currentActiveCourse.name || '課程資訊';
+      document.title = `【受訓證明】${code}${name}`;
+      
+      window.print();
+      
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
     }
 
     let currentEditingCourseCode = '';
