@@ -1860,8 +1860,9 @@
                   <label for="admin-select-course" style="font-weight: 600;">選擇編輯課程：</label>
                   <select id="admin-select-course" onchange="onAdminSelectCourseChange()"></select>
                 </div>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                   <button type="button" class="btn btn-primary" onclick="addNewCourse()" style="padding: 10px 14px; font-size: 13px;">＋ 新增課程</button>
+                  <button type="button" class="btn btn-secondary" onclick="duplicateCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); color: var(--text-main); background: #ffffff;">📋 複製課程</button>
                   <button type="button" class="btn" onclick="deleteCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid #ffcccc; color: #b62630; background: #fff5f5;">🗑️ 刪除此課程</button>
                 </div>
               </div>
@@ -2686,6 +2687,67 @@
         regUrl: ''
       });
       populateAdminCourseSelector(newCode);
+    }
+
+    function duplicateCurrentCourse() {
+      saveCurrentCourseToMemory();
+      const current = gCourses.find(c => c.code === currentEditingCourseCode);
+      if (!current) {
+        alert('請先選擇欲複製的課程！');
+        return;
+      }
+
+      // 自動產生建議的新課程代碼 (如 AF01-COPY, AF01-COPY2)
+      let baseCode = current.code ? (current.code + '-COPY') : 'NEW-COPY';
+      let candidateCode = baseCode;
+      let counter = 2;
+      while (gCourses.some(c => c.code && c.code.toLowerCase() === candidateCode.toLowerCase())) {
+        candidateCode = `${baseCode}${counter++}`;
+      }
+
+      const promptCode = prompt(`請輸入複製後的「新課程代碼」：`, candidateCode);
+      if (promptCode === null) {
+        return; // 使用者按取消
+      }
+
+      const finalCode = promptCode.trim();
+      if (!finalCode) {
+        alert('新課程代碼不能為空！');
+        return;
+      }
+
+      if (gCourses.some(c => c.code && c.code.toLowerCase() === finalCode.toLowerCase())) {
+        alert(`課程代碼「${finalCode}」已存在，請使用不同的代碼！`);
+        return;
+      }
+
+      const newCourse = {
+        code: finalCode,
+        name: current.name ? `${current.name} (複製)` : '新課程',
+        outline: current.outline || '',
+        classDate: current.classDate || '',
+        classTime: current.classTime || '',
+        classroom: current.classroom || '',
+        salesDrill: current.salesDrill || '',
+        homework: current.homework || '',
+        participants: current.participants || '',
+        remarks: current.remarks || '',
+        regStatus: current.regStatus || '由經銷業務統一報名',
+        regUrl: current.regUrl || ''
+      };
+
+      gCourses.push(newCourse);
+      populateAdminCourseSelector(finalCode);
+
+      setTimeout(() => {
+        const nameInput = document.getElementById('edit-course-name');
+        if (nameInput) {
+          nameInput.focus();
+          nameInput.select();
+        }
+      }, 50);
+
+      alert(`已成功複製課程並建立「${finalCode}」！\n所有詳細內容已載入編輯器，修改完成後請記得點擊下方「儲存課程詳細內容」寫入資料庫。`);
     }
 
     function deleteCurrentCourse() {
