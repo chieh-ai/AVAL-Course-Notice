@@ -81,8 +81,8 @@
     .apple-logo {
       color: var(--accent-red);
       margin-right: 4px;
-      font-size: 22px;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       vertical-align: middle;
     }
 
@@ -105,8 +105,9 @@
 
     /* 齒輪圖示微動畫 */
     .admin-nav-link {
-      font-size: 16px !important;
-      display: inline-block;
+      display: inline-flex !important;
+      align-items: center;
+      color: var(--text-muted);
       transition: transform 0.3s ease, color 0.3s ease !important;
     }
     .admin-nav-link:hover {
@@ -403,15 +404,14 @@
     }
 
     .badge-icon {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 20px;
       height: 20px;
       background-color: var(--bg-color);
       border-radius: 50%;
-      text-align: center;
-      line-height: 20px;
-      font-size: 11px;
-      font-weight: bold;
+      line-height: 1;
     }
 
     /* ==========================================================================
@@ -541,8 +541,12 @@
     }
 
     .file-icon {
-      font-size: 24px;
       color: var(--accent-red);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
     }
 
     .file-name {
@@ -558,9 +562,11 @@
     }
 
     .download-icon {
-      font-size: 18px;
       color: var(--text-muted);
       transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .resource-item:hover .download-icon {
@@ -881,9 +887,11 @@
       text-align: center;
     }
     .login-logo {
-      font-size: 40px;
       margin-bottom: 15px;
-      color: var(--text-primary);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .login-title {
       font-size: 20px;
@@ -1002,10 +1010,13 @@
     .admin-close-btn {
       background: none;
       border: none;
-      font-size: 18px;
       color: var(--text-muted);
       cursor: pointer;
       transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
     }
     .admin-close-btn:hover {
       color: var(--text-main);
@@ -1497,7 +1508,7 @@
         <a href="#notice-section">注意事項</a>
         <a href="#upload-section">作業繳交</a>
         <a href="#resources-section">教材共享</a>
-        <a href="javascript:void(0)" onclick="triggerAdminLogin()" class="admin-nav-link" id="nav-admin-link" title="管理控制台">⚙️</a>
+        <a href="javascript:void(0)" onclick="triggerAdminLogin()" class="admin-nav-link" id="nav-admin-link" title="管理控制台"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
       </nav>
     </div>
   </header>
@@ -1516,7 +1527,7 @@
           <section id="calendar-section" class="card">
             <div class="card-title">
               <div class="calendar-header">
-                <span><span class="apple-logo"></span>Sales Training 課程表</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px;"><span class="apple-logo"><svg viewBox="0 0 170 170" width="18" height="18" fill="currentColor"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.59-7.71-11.69-14.01-6.1-9.35-10.8-19.78-14.11-31.31-3.3-11.53-4.96-22.38-4.96-32.55 0-14.28 3.59-26.16 10.77-35.63 7.18-9.48 16.27-14.34 27.28-14.59 4.8-.12 10.15 1.18 16.06 3.91 5.91 2.73 9.77 4.15 11.59 4.25 1.45 0 5.46-1.42 12.03-4.25 6.57-2.84 12.18-4.15 16.82-3.91 12.59.62 22.82 5.56 30.68 14.83-11.04 6.7-16.45 15.93-16.24 27.69.21 9.17 3.85 16.92 10.92 23.25 7.07 6.33 15.53 9.94 25.38 10.82-2.34 7.21-5.18 14.45-8.52 21.72zM119.22 31.84c0-7.72 2.76-14.77 8.28-21.15 5.53-6.38 12.16-10.33 19.9-11.85.21 1.25.32 2.4.32 3.45 0 7.62-2.93 14.77-8.79 21.46-5.87 6.69-12.63 10.53-20.29 11.53-.42-1.15-.64-2.3-.64-3.44z"/></svg></span>Sales Training 課程表</span>
                 <div style="display: flex; align-items: center;">
                   <select id="month-selector" class="month-select" style="display: none;" onchange="onMonthChange()"></select>
                   <span id="admin-indicator" class="admin-badge" style="display: none;">管理員模式</span>
@@ -1526,7 +1537,7 @@
             <div id="calendar-loader" class="skeleton skeleton-calendar"></div>
             <div id="calendar-container"></div>
             <div class="calendar-hint">
-              <span style="font-size: 13px;">💡</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
               <span>點擊課程代碼可查看詳細課程資訊。</span>
             </div>
           </section>
@@ -1592,7 +1603,8 @@
           <!-- 課程詳細說明底部動作列 (列印 / 匯出 PDF) -->
           <div id="details-action-bar" style="display: none; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); justify-content: flex-end; align-items: center;">
             <button type="button" id="btn-print-course" class="btn btn-secondary" onclick="printCourseDetails()" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #ffffff; color: var(--text-main); cursor: pointer;">
-              <span>🖨️</span> <span>課程資訊</span>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <span>課程資訊</span>
             </button>
           </div>
         </section>
@@ -1627,11 +1639,13 @@
 
           <!-- 分段標籤切換列 (Segmented Control: 方案 A) -->
           <div class="subcard-tabs">
-            <button type="button" id="tab-btn-upload" class="subcard-tab-btn active" onclick="switchUploadTab('upload')">
-              📤 上傳作業
+            <button type="button" id="tab-btn-upload" class="subcard-tab-btn active" onclick="switchUploadTab('upload')" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>上傳作業</span>
             </button>
-            <button type="button" id="tab-btn-query" class="subcard-tab-btn" onclick="switchUploadTab('query')">
-              🔍 查詢繳交狀況
+            <button type="button" id="tab-btn-query" class="subcard-tab-btn" onclick="switchUploadTab('query')" style="display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>查詢繳交狀況</span>
             </button>
           </div>
 
@@ -1666,7 +1680,11 @@
               <div class="form-group">
                 <label class="form-label">選擇繳交的檔案 <span style="color: var(--accent-red);">*</span></label>
                 <div class="upload-zone" id="upload-dropzone" onclick="triggerFileInput()">
-                  <div class="upload-icon">↑</div>
+                  <div class="upload-icon">
+                    <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </div>
                   <div class="upload-text">將檔案拖曳至此，或 <span>點擊上傳</span></div>
                   <div class="upload-text" style="font-size: 11px; margin-top: 6px; color: var(--text-muted);">支援 PDF、Word、PPT、圖片等格式 (限 15MB 內)</div>
                   <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
@@ -1751,7 +1769,10 @@
     <div class="print-doc">
       <div class="print-header">
         <div class="print-header-left">
-          <div class="print-logo"> AVAL Technologies 暐固科技</div>
+          <div class="print-logo" style="display: flex; align-items: center; gap: 5px;">
+            <svg viewBox="0 0 170 170" width="16" height="16" fill="currentColor"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.59-7.71-11.69-14.01-6.1-9.35-10.8-19.78-14.11-31.31-3.3-11.53-4.96-22.38-4.96-32.55 0-14.28 3.59-26.16 10.77-35.63 7.18-9.48 16.27-14.34 27.28-14.59 4.8-.12 10.15 1.18 16.06 3.91 5.91 2.73 9.77 4.15 11.59 4.25 1.45 0 5.46-1.42 12.03-4.25 6.57-2.84 12.18-4.15 16.82-3.91 12.59.62 22.82 5.56 30.68 14.83-11.04 6.7-16.45 15.93-16.24 27.69.21 9.17 3.85 16.92 10.92 23.25 7.07 6.33 15.53 9.94 25.38 10.82-2.34 7.21-5.18 14.45-8.52 21.72zM119.22 31.84c0-7.72 2.76-14.77 8.28-21.15 5.53-6.38 12.16-10.33 19.9-11.85.21 1.25.32 2.4.32 3.45 0 7.62-2.93 14.77-8.79 21.46-5.87 6.69-12.63 10.53-20.29 11.53-.42-1.15-.64-2.3-.64-3.44z"/></svg>
+            <span>AVAL Technologies 暐固科技</span>
+          </div>
           <div class="print-title">課程培訓通知暨受訓證明</div>
         </div>
         <div class="print-header-right">
@@ -1816,7 +1837,9 @@
   <!-- 管理員登入遮罩視窗 -->
   <div class="admin-login-overlay" id="admin-login-overlay" style="display: none;">
     <div class="login-card">
-      <div class="login-logo"></div>
+      <div class="login-logo">
+        <svg viewBox="0 0 170 170" width="48" height="48" fill="currentColor"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.59-7.71-11.69-14.01-6.1-9.35-10.8-19.78-14.11-31.31-3.3-11.53-4.96-22.38-4.96-32.55 0-14.28 3.59-26.16 10.77-35.63 7.18-9.48 16.27-14.34 27.28-14.59 4.8-.12 10.15 1.18 16.06 3.91 5.91 2.73 9.77 4.15 11.59 4.25 1.45 0 5.46-1.42 12.03-4.25 6.57-2.84 12.18-4.15 16.82-3.91 12.59.62 22.82 5.56 30.68 14.83-11.04 6.7-16.45 15.93-16.24 27.69.21 9.17 3.85 16.92 10.92 23.25 7.07 6.33 15.53 9.94 25.38 10.82-2.34 7.21-5.18 14.45-8.52 21.72zM119.22 31.84c0-7.72 2.76-14.77 8.28-21.15 5.53-6.38 12.16-10.33 19.9-11.85.21 1.25.32 2.4.32 3.45 0 7.62-2.93 14.77-8.79 21.46-5.87 6.69-12.63 10.53-20.29 11.53-.42-1.15-.64-2.3-.64-3.44z"/></svg>
+      </div>
       <div class="login-title">系統管理員登入</div>
       <div class="login-subtitle">請輸入管理密碼以存取後台設定</div>
       <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
@@ -1833,8 +1856,13 @@
   <div class="admin-panel-overlay" id="admin-panel-overlay" style="display: none;">
     <div class="admin-panel-card">
       <div class="admin-panel-header">
-        <div class="admin-panel-title"> AVAL 課程公告管理控制台</div>
-        <button class="admin-close-btn" onclick="toggleAdminPanel(false)">✕</button>
+        <div class="admin-panel-title" style="display: flex; align-items: center; gap: 6px;">
+          <svg viewBox="0 0 170 170" width="18" height="18" fill="var(--accent-red)"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.59-7.71-11.69-14.01-6.1-9.35-10.8-19.78-14.11-31.31-3.3-11.53-4.96-22.38-4.96-32.55 0-14.28 3.59-26.16 10.77-35.63 7.18-9.48 16.27-14.34 27.28-14.59 4.8-.12 10.15 1.18 16.06 3.91 5.91 2.73 9.77 4.15 11.59 4.25 1.45 0 5.46-1.42 12.03-4.25 6.57-2.84 12.18-4.15 16.82-3.91 12.59.62 22.82 5.56 30.68 14.83-11.04 6.7-16.45 15.93-16.24 27.69.21 9.17 3.85 16.92 10.92 23.25 7.07 6.33 15.53 9.94 25.38 10.82-2.34 7.21-5.18 14.45-8.52 21.72zM119.22 31.84c0-7.72 2.76-14.77 8.28-21.15 5.53-6.38 12.16-10.33 19.9-11.85.21 1.25.32 2.4.32 3.45 0 7.62-2.93 14.77-8.79 21.46-5.87 6.69-12.63 10.53-20.29 11.53-.42-1.15-.64-2.3-.64-3.44z"/></svg>
+          <span>AVAL 課程公告管理控制台</span>
+        </div>
+        <button class="admin-close-btn" onclick="toggleAdminPanel(false)" style="display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div class="admin-panel-body">
         <!-- 左側導覽頁籤 -->
@@ -1846,7 +1874,10 @@
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-system')">聯絡與安全設定</button>
           <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tab-logs')" id="tab-btn-logs">學員作業紀錄</button>
           <div style="flex-grow: 1;"></div>
-          <button class="admin-logout-btn" onclick="logoutAdmin()">🚪 安全登出</button>
+          <button class="admin-logout-btn" onclick="logoutAdmin()" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>安全登出</span>
+          </button>
         </div>
         
         <!-- 右側內容區 -->
@@ -1861,9 +1892,18 @@
                   <select id="admin-select-course" onchange="onAdminSelectCourseChange()"></select>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-primary" onclick="addNewCourse()" style="padding: 10px 14px; font-size: 13px;">＋ 新增課程</button>
-                  <button type="button" class="btn btn-secondary" onclick="duplicateCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); color: var(--text-main); background: #ffffff;">📋 複製課程</button>
-                  <button type="button" class="btn" onclick="deleteCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid #ffcccc; color: #b62630; background: #fff5f5;">🗑️ 刪除此課程</button>
+                  <button type="button" class="btn btn-primary" onclick="addNewCourse()" style="padding: 10px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>新增課程</span>
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="duplicateCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid var(--border-color); color: var(--text-main); background: #ffffff; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>複製課程</span>
+                  </button>
+                  <button type="button" class="btn" onclick="deleteCurrentCourse()" style="padding: 10px 14px; font-size: 13px; border: 1px solid #ffcccc; color: #b62630; background: #fff5f5; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>刪除此課程</span>
+                  </button>
                 </div>
               </div>
               <div class="form-row">
@@ -2021,7 +2061,10 @@
           <div class="admin-tab-content" id="tab-logs">
             <div class="logs-admin-header">
               <div class="admin-section-title" style="margin-bottom: 0;">學員繳交紀錄列表 (從試算表即時載入)</div>
-              <button class="btn btn-secondary btn-sm" onclick="fetchAdminUploadLogs()">🔄 重新整理</button>
+              <button class="btn btn-secondary btn-sm" onclick="fetchAdminUploadLogs()" style="display: inline-flex; align-items: center; gap: 4px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                <span>重新整理</span>
+              </button>
             </div>
             <div class="logs-table-container">
               <table class="logs-admin-table">
@@ -2333,7 +2376,7 @@
                     <div class="file-meta">${file.size} &middot; 更新於 ${file.updated}</div>
                   </div>
                 </div>
-                <span class="download-icon">↓</span>
+                <span class="download-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
               `;
               container.appendChild(card);
             });
@@ -2386,7 +2429,7 @@
           const name = parts[0].trim();
           const phone = parts[1].trim();
           const email = parts[2].trim();
-          footerContactEl.innerHTML = `<strong>${name}</strong> &nbsp;|&nbsp; 📞 電話：<a href="tel:${phone}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${phone}</a> &nbsp;|&nbsp; ✉️ 信箱：<a href="mailto:${email}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${email}</a>`;
+          footerContactEl.innerHTML = `<strong>${name}</strong> &nbsp;|&nbsp; <span style="display:inline-flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 電話：</span><a href="tel:${phone}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${phone}</a> &nbsp;|&nbsp; <span style="display:inline-flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> 信箱：</span><a href="mailto:${email}" style="color: var(--accent-red); text-decoration: none; font-weight: 500;">${email}</a>`;
         } else {
           footerContactEl.innerText = contactRaw;
         }
@@ -2782,11 +2825,11 @@
      */
     function setCheckmark(element, val) {
       if (val === '◎' || val === 'O' || val === 'o' || val === 'true') {
-        element.innerText = '✓';
+        element.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="20 6 9 17 4 12"/></svg>';
         element.style.color = '#27ae60';
         element.style.backgroundColor = '#e8f8f0';
-      } else if (!val || val === '✕' || val === 'X' || val === 'x' || val === 'false') {
-        element.innerText = '✕';
+      } else if (!val || val === '\u2715' || val === 'X' || val === 'x' || val === 'false') {
+        element.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
         element.style.color = '#c0392b';
         element.style.backgroundColor = '#fde8e8';
       } else {
@@ -2830,12 +2873,24 @@
      * 取得檔案類型的對應圖示
      */
     function getFileIcon(mimeType) {
-      if (mimeType.includes('pdf')) return '📄';
-      if (mimeType.includes('msword') || mimeType.includes('officedocument.word')) return '📝';
-      if (mimeType.includes('powerpoint') || mimeType.includes('officedocument.presentation')) return '📊';
-      if (mimeType.includes('excel') || mimeType.includes('officedocument.spreadsheet')) return '📈';
-      if (mimeType.includes('image')) return '🖼️';
-      return '📁';
+      if (!mimeType) mimeType = '';
+      mimeType = mimeType.toLowerCase();
+      if (mimeType.includes('pdf')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+      }
+      if (mimeType.includes('msword') || mimeType.includes('officedocument.word') || mimeType.includes('document')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 17l1.5-6 2.5 4 2.5-4 1.5 6"/></svg>';
+      }
+      if (mimeType.includes('powerpoint') || mimeType.includes('officedocument.presentation') || mimeType.includes('presentation')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M7 8h10M7 11h6"/></svg>';
+      }
+      if (mimeType.includes('excel') || mimeType.includes('officedocument.spreadsheet') || mimeType.includes('sheet')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="12" y1="11" x2="12" y2="19"/></svg>';
+      }
+      if (mimeType.includes('image')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+      }
+      return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
     }
 
     /* ==========================================================================
@@ -2971,7 +3026,7 @@
           if (response.success) {
             progressFill.style.width = '100%';
             statusMsg.className = 'status-message status-success';
-            statusMsg.innerHTML = `✓ 上傳成功！已將「${escapeHtml(response.fileName)}」存入您的專屬資料夾。<br><a href="javascript:void(0)" onclick="quickViewStudentStatus('${escapeHtml(studentName.trim())}', '${escapeHtml(studentPasscode)}')" style="color: var(--accent-red); font-weight: 600; text-decoration: underline; margin-top: 6px; display: inline-block;">點此查看您的繳交狀況 ↗</a>`;
+            statusMsg.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 上傳成功！</span>已將「${escapeHtml(response.fileName)}」存入您的專屬資料夾。<br><a href="javascript:void(0)" onclick="quickViewStudentStatus('${escapeHtml(studentName.trim())}', '${escapeHtml(studentPasscode)}')" style="color: var(--accent-red); font-weight: 600; text-decoration: underline; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;">點此查看您的繳交狀況 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a>`;
             
             document.getElementById('student-name').value = '';
             document.getElementById('student-passcode').value = '';
@@ -2979,14 +3034,14 @@
           } else {
             progressFill.style.width = '0%';
             statusMsg.className = 'status-message status-error';
-            statusMsg.innerText = `✕ 上傳失敗：${response.error}`;
+            statusMsg.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 上傳失敗：</span>${escapeHtml(response.error)}`;
             document.getElementById('submit-upload-btn').disabled = false;
           }
         })
         .catch(err => {
           progressFill.style.width = '0%';
           statusMsg.className = 'status-message status-error';
-          statusMsg.innerText = `✕ 系統連線發生錯誤，請稍後再試。`;
+          statusMsg.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 系統連線發生錯誤，請稍後再試。</span>`;
           document.getElementById('submit-upload-btn').disabled = false;
         });
       };
@@ -3107,8 +3162,9 @@
             renderStudentUploadEmpty(name);
           } else if (data.error) {
             resultBox.innerHTML = `
-              <div style="color: var(--accent-red); font-size: 13px; padding: 12px 14px; background: #fff2f2; border: 1px solid #ffd0d0; border-radius: 8px;">
-                ⚠️ ${escapeHtml(data.error)}
+              <div style="color: var(--accent-red); font-size: 13px; padding: 12px 14px; background: #fff2f2; border: 1px solid #ffd0d0; border-radius: 8px; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>${escapeHtml(data.error)}</span>
               </div>`;
           } else {
             renderStudentUploadEmpty(name);
@@ -3144,10 +3200,10 @@
           <div class="query-record-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span class="worktype-badge ${badgeClass}">${escapeHtml(log.workType || '作業')}</span>
-              <span style="font-size: 11.5px; color: #777;">🕒 ${escapeHtml(log.timestamp)}</span>
+              <span style="font-size: 11.5px; color: #777; display: inline-flex; align-items: center; gap: 3px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${escapeHtml(log.timestamp)}</span>
             </div>
             <div style="font-size: 13px; color: #222; word-break: break-all; line-height: 1.45;">
-              <span style="color: #666; font-size: 12.5px;">📎 檔案明細：</span><strong>${escapeHtml(log.fileName)}</strong>
+              <span style="color: #666; font-size: 12.5px; display: inline-flex; align-items: center; gap: 3px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 檔案明細：</span><strong>${escapeHtml(log.fileName)}</strong>
             </div>
           </div>
         `;
@@ -3164,7 +3220,7 @@
       const resultBox = document.getElementById('query-result-box');
       resultBox.innerHTML = `
         <div style="text-align: center; padding: 28px 16px; background: #fafafa; border: 1px dashed var(--border-color); border-radius: 10px; color: var(--text-muted); font-size: 13px;">
-          <div style="font-size: 26px; margin-bottom: 8px;">📋</div>
+          <div style="display: flex; justify-content: center; margin-bottom: 10px; color: #a1a1a6;"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div>
           <div style="font-weight: 600; color: #333; margin-bottom: 4px;">查無「${escapeHtml(targetName)}」的作業紀錄</div>
           <div style="font-size: 12px; color: #777; line-height: 1.4;">請確認輸入的中文全名是否正確，或尚未完成作業繳交。</div>
         </div>
@@ -3903,8 +3959,8 @@
           <td style="font-weight: 500;">${l.studentName}</td>
           <td style="color: var(--accent-red); font-weight: 500;">${l.workType || '課後作業'}</td>
           <td style="color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${l.fileName}</td>
-          <td><a href="${l.fileUrl}" target="_blank" class="link-table">下載檔案 ↗</a></td>
-          <td><a href="${l.folderUrl}" target="_blank" class="link-table">學員資料夾 ↗</a></td>
+          <td><a href="${l.fileUrl}" target="_blank" class="link-table">下載檔案 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a></td>
+          <td><a href="${l.folderUrl}" target="_blank" class="link-table">學員資料夾 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a></td>
         `;
         listContainer.appendChild(tr);
       });
