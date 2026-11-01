@@ -416,6 +416,49 @@
       line-height: 1;
     }
 
+    .class-time-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-add-calendar {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #ffffff;
+      border: 1px solid #d2d2d7;
+      color: var(--accent-red);
+      padding: 4px 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn-add-calendar:hover {
+      background: #fff5f5;
+      border-color: var(--accent-red);
+      color: #b00010;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(215, 0, 21, 0.12);
+    }
+
+    .btn-add-calendar:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .btn-add-calendar svg {
+      flex-shrink: 0;
+    }
+
     /* ==========================================================================
        6. 地圖區與報名網址 (Map & Registration Styles)
        ========================================================================== */
@@ -1583,7 +1626,22 @@
             </tr>
             <tr>
               <td class="detail-label">上課時間</td>
-              <td class="detail-value" id="class-time"></td>
+              <td class="detail-value">
+                <div class="class-time-row">
+                  <span id="class-time"></span>
+                  <button type="button" class="btn-add-calendar" id="btn-add-calendar" onclick="addCurrentCourseToCalendar()" title="將此課程加入行事曆（自動設定 1 天前與 2 天前課前作業提醒）">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                      <line x1="12" y1="14" x2="12" y2="18"/>
+                      <line x1="10" y1="16" x2="14" y2="16"/>
+                    </svg>
+                    <span>加入行事曆</span>
+                  </button>
+                </div>
+              </td>
             </tr>
             <tr>
               <td class="detail-label">上課教室</td>
@@ -2609,6 +2667,191 @@
       setTimeout(() => {
         document.title = originalTitle;
       }, 1000);
+    }
+
+    /**
+     * 輔助函式：逸出 iCalendar (RFC 5545) 特殊字元
+     */
+    function escapeICS(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\n/g, '\\n');
+    }
+
+    /**
+     * 依據課程內容產生標準 iCalendar (.ics) 字串
+     * 包含 1 天前與 2 天前雙提醒（VALARM），並帶入「記得繳交課前作業」
+     */
+    function buildCourseIcsContent(course, config, events, selectedMonth) {
+      const pad = n => String(n).padStart(2, '0');
+      
+      // 1. 解析上課開始與結束時間
+      let startH = 9, startM = 30;
+      let endH = 17, endM = 0;
+      if (course.classTime) {
+        const tm = course.classTime.match(/(\d{1,2}):(\d{2})\s*(?:至|-|~)\s*(\d{1,2}):(\d{2})/);
+        if (tm) {
+          startH = parseInt(tm[1], 10);
+          startM = parseInt(tm[2], 10);
+          endH = parseInt(tm[3], 10);
+          endM = parseInt(tm[4], 10);
+        }
+      }
+
+      // 2. 解析日期 (優先比對 events)
+      let startDateStr = '';
+      let endDateStr = '';
+      const ev = (events || []).find(e => e.code && e.code === course.code);
+      if (ev && ev.startDate) {
+        startDateStr = ev.startDate;
+        endDateStr = ev.endDate || ev.startDate;
+      } else if (course.classDate) {
+        const dates = course.classDate.match(/(\d{1,2})\/(\d{1,2})/g);
+        if (dates && dates.length > 0) {
+          let year = new Date().getFullYear();
+          if (selectedMonth && selectedMonth.indexOf('-') > 0) {
+            year = parseInt(selectedMonth.split('-')[0], 10);
+          }
+          const p1 = dates[0].split('/');
+          startDateStr = `${year}-${pad(p1[0])}-${pad(p1[1])}`;
+          if (dates.length > 1 && (course.classDate.includes('至') || course.classDate.includes('~') || course.classDate.includes('-'))) {
+            const p2 = dates[dates.length - 1].split('/');
+            endDateStr = `${year}-${pad(p2[0])}-${pad(p2[1])}`;
+          } else {
+            endDateStr = startDateStr;
+          }
+        }
+      }
+
+      if (!startDateStr) {
+        const today = new Date();
+        startDateStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+        endDateStr = startDateStr;
+      }
+
+      const sParts = startDateStr.split('-');
+      const dtStart = `${sParts[0]}${pad(sParts[1])}${pad(sParts[2])}T${pad(startH)}${pad(startM)}00`;
+      const dtEnd = `${sParts[0]}${pad(sParts[1])}${pad(sParts[2])}T${pad(endH)}${pad(endM)}00`;
+
+      let rrule = '';
+      if (endDateStr && endDateStr !== startDateStr) {
+        const eParts = endDateStr.split('-');
+        rrule = `RRULE:FREQ=DAILY;UNTIL=${eParts[0]}${pad(eParts[1])}${pad(eParts[2])}T235959Z\r\n`;
+      }
+
+      const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const uid = `course-${course.code || 'notice'}-${Date.now()}@aval-technologies`;
+
+      const title = `【課程】${course.code ? course.code + ' ' : ''}${course.name || '培訓課程'}`;
+      
+      let loc = '';
+      const baseLoc = (config && config.location) ? config.location.trim() : '';
+      const room = (course.classroom || '').trim();
+      if (room && baseLoc) {
+        if (room.includes(baseLoc)) {
+          loc = room;
+        } else {
+          loc = `${baseLoc}（${room}）`;
+        }
+      } else {
+        loc = room || baseLoc || '';
+      }
+
+      const descText = [
+        '【課前重要提醒】',
+        '請記得於上課前完成並至系統繳交「課前作業」！',
+        '',
+        `【課程名稱】${course.name || ''}`,
+        `【課程代碼】${course.code || ''}`,
+        `【上課時間】${course.classTime || ''}`,
+        `【上課教室】${course.classroom || ''}`,
+        `【上課地點】${baseLoc}`,
+        course.outline ? `\n【課程大綱】\n${course.outline}` : '',
+        course.remarks ? `\n【備註事項】\n${course.remarks}` : '',
+        '',
+        '課程公告與作業繳交系統：',
+        'https://chieh-ai.github.io/AVAL-Course-Notice/'
+      ].filter(l => l !== undefined).join('\n');
+
+      const courseName = course.name || '培訓';
+
+      const icsLines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//AVAL Technologies//Course Notice System//ZH',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VTIMEZONE',
+        'TZID:Asia/Taipei',
+        'X-LIC-LOCATION:Asia/Taipei',
+        'BEGIN:STANDARD',
+        'TZOFFSETFROM:+0800',
+        'TZOFFSETTO:+0800',
+        'TZNAME:CST',
+        'DTSTART:19700101T000000',
+        'END:STANDARD',
+        'END:VTIMEZONE',
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${now}`,
+        `DTSTART;TZID=Asia/Taipei:${dtStart}`,
+        `DTEND;TZID=Asia/Taipei:${dtEnd}`,
+        rrule ? rrule.trim() : null,
+        `SUMMARY:${escapeICS(title)}`,
+        `LOCATION:${escapeICS(loc)}`,
+        `DESCRIPTION:${escapeICS(descText)}`,
+        'STATUS:CONFIRMED',
+        'BEGIN:VALARM',
+        'TRIGGER:-P2D',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${escapeICS('【上課提醒】後天有「' + courseName + '」課程，請確認課堂資訊並記得繳交課前作業！')}`,
+        'END:VALARM',
+        'BEGIN:VALARM',
+        'TRIGGER:-P1D',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${escapeICS('【最後提醒】明天即將上課：「' + courseName + '」，請備妥上課設備並記得繳交課前作業！')}`,
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].filter(Boolean).join('\r\n');
+
+      return icsLines;
+    }
+
+    /**
+     * 加入目前選中課程至個人行事曆 (方案 1: 一鍵喚醒 Apple 行事曆 / 下載 .ics)
+     */
+    function addCurrentCourseToCalendar() {
+      if (!currentActiveCourse) {
+        alert('尚未選取課程資訊，請先於課程表選擇課程');
+        return;
+      }
+      
+      const icsContent = buildCourseIcsContent(currentActiveCourse, gConfig, gEvents, currentSelectedMonth);
+      const safeCode = (currentActiveCourse.code || '').replace(/[^\w-]/g, '');
+      const safeName = (currentActiveCourse.name || '課程').replace(/[^\w\u4e00-\u9fa5-]/g, '_');
+      const filename = `${safeCode ? safeCode + '_' : ''}${safeName}.ics`;
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        // iOS Safari 導向 data: URI 可直接喚醒原生 Apple 行事曆預覽與加入視窗
+        window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
+      } else {
+        // 桌面端 (macOS/Windows) 與 Android 透過 Blob 下載 .ics，點擊直接開啟
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+      }
     }
 
     let currentEditingCourseCode = '';
