@@ -608,6 +608,91 @@
     .status-success { color: green; }
     .status-error { color: var(--accent-red); }
 
+    /* 作業切換頁籤與查詢記錄樣式 */
+    .subcard-tabs {
+      display: flex;
+      background: #f2f2f7;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 22px;
+      gap: 4px;
+    }
+
+    .subcard-tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 7px;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      color: #666;
+      transition: all 0.2s ease;
+      font-family: var(--font-family);
+      outline: none;
+    }
+
+    .subcard-tab-btn.active {
+      background: #ffffff;
+      color: #1d1d1f;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      font-weight: 600;
+    }
+
+    .worktype-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-pre {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    .badge-inclass {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    .badge-post {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .badge-ios {
+      background: #f3e5f5;
+      color: #4a148c;
+    }
+
+    .badge-mac {
+      background: #ede7f6;
+      color: #311b92;
+    }
+
+    .badge-other {
+      background: #f5f5f7;
+      color: #555555;
+    }
+
+    .query-record-card {
+      background: #fafafa;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 14px;
+      transition: all 0.2s ease;
+    }
+
+    .query-record-card:hover {
+      background: #ffffff;
+      border-color: #c7c7cc;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
     /* ==========================================================================
        8. 注意事項與聯絡資訊 (Notices & Contact Info Styles)
        ========================================================================== */
@@ -1437,50 +1522,103 @@
         <!-- 區塊：學員作業上傳區 (Upload) -->
         <section id="upload-section" class="card">
           <div class="card-title">課程練習與作業繳交</div>
-          <form id="upload-form" onsubmit="handleFormSubmit(event)">
-            
-            <div class="form-group">
-              <label class="form-label" for="work-type">繳交類型 <span style="color: var(--accent-red);">*</span></label>
-              <select id="work-type" class="form-input" style="width: 100%; height: 44px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white;" required>
-                <option value="課前作業">課前作業</option>
-                <option value="課堂練習">課堂練習</option>
-                <option value="課後作業" selected>課後作業</option>
-                <option value="iOS 檢定腳本">iOS 檢定腳本</option>
-                <option value="Mac 檢定腳本">Mac 檢定腳本</option>
-              </select>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label" for="student-name">中文全名 <span style="color: var(--accent-red);">*</span></label>
-              <input type="text" id="student-name" class="form-input" placeholder="請輸入學員姓名" required>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">選擇繳交的檔案 <span style="color: var(--accent-red);">*</span></label>
-              <div class="upload-zone" id="upload-dropzone" onclick="triggerFileInput()">
-                <div class="upload-icon">↑</div>
-                <div class="upload-text">將檔案拖曳至此，或 <span>點擊上傳</span></div>
-                <div class="upload-text" style="font-size: 11px; margin-top: 6px; color: var(--text-muted);">支援 PDF、Word、PPT、圖片等格式 (限 15MB 內)</div>
-                <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+          <!-- 分段標籤切換列 (Segmented Control: 方案 A) -->
+          <div class="subcard-tabs">
+            <button type="button" id="tab-btn-upload" class="subcard-tab-btn active" onclick="switchUploadTab('upload')">
+              📤 上傳作業
+            </button>
+            <button type="button" id="tab-btn-query" class="subcard-tab-btn" onclick="switchUploadTab('query')">
+              🔍 查詢繳交狀況
+            </button>
+          </div>
+
+          <!-- 檢視 A：作業上傳表單 -->
+          <div id="view-upload-panel">
+            <form id="upload-form" onsubmit="handleFormSubmit(event)">
+              
+              <div class="form-group">
+                <label class="form-label" for="work-type">繳交類型 <span style="color: var(--accent-red);">*</span></label>
+                <select id="work-type" class="form-input" style="width: 100%; height: 44px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: white;" required>
+                  <option value="課前作業">課前作業</option>
+                  <option value="課堂練習">課堂練習</option>
+                  <option value="課後作業" selected>課後作業</option>
+                  <option value="iOS 檢定腳本">iOS 檢定腳本</option>
+                  <option value="Mac 檢定腳本">Mac 檢定腳本</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="student-name">中文全名 <span style="color: var(--accent-red);">*</span></label>
+                <input type="text" id="student-name" class="form-input" placeholder="請輸入學員姓名" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="student-passcode">
+                  驗證密碼 <span style="color: var(--accent-red);">*</span>
+                  <span style="font-size: 11.5px; font-weight: normal; color: var(--text-muted); margin-left: 4px;">(自訂 4 碼數字，供查詢時驗證保護個資)</span>
+                </label>
+                <input type="password" id="student-passcode" class="form-input" placeholder="請設定 4 碼數字密碼 (例如：1234)" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required autocomplete="off">
               </div>
               
-              <!-- 顯示已選取檔案 -->
-              <div class="file-selected-box" id="file-display-box">
-                <span class="file-selected-name" id="selected-file-name"></span>
-                <span class="remove-file-btn" onclick="removeSelectedFile(event)">刪除</span>
+              <div class="form-group">
+                <label class="form-label">選擇繳交的檔案 <span style="color: var(--accent-red);">*</span></label>
+                <div class="upload-zone" id="upload-dropzone" onclick="triggerFileInput()">
+                  <div class="upload-icon">↑</div>
+                  <div class="upload-text">將檔案拖曳至此，或 <span>點擊上傳</span></div>
+                  <div class="upload-text" style="font-size: 11px; margin-top: 6px; color: var(--text-muted);">支援 PDF、Word、PPT、圖片等格式 (限 15MB 內)</div>
+                  <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+                </div>
+                
+                <!-- 顯示已選取檔案 -->
+                <div class="file-selected-box" id="file-display-box">
+                  <span class="file-selected-name" id="selected-file-name"></span>
+                  <span class="remove-file-btn" onclick="removeSelectedFile(event)">刪除</span>
+                </div>
+              </div>
+
+              <button type="submit" id="submit-upload-btn" class="btn btn-primary btn-block" disabled>確認上傳繳交</button>
+              
+              <!-- 進度與上傳狀態 -->
+              <div class="progress-container" id="progress-area">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="status-message" id="upload-status"></div>
+              </div>
+            </form>
+          </div>
+
+          <!-- 檢視 B：作業繳交狀況查詢 -->
+          <div id="view-query-panel" style="display: none;">
+            <div class="form-group">
+              <label class="form-label" for="query-student-name">中文全名 <span style="color: var(--accent-red);">*</span></label>
+              <input type="text" id="query-student-name" class="form-input" placeholder="請輸入欲查詢的學員姓名" style="height: 44px;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="query-student-passcode">
+                驗證密碼 <span style="color: var(--accent-red);">*</span>
+                <span style="font-size: 11.5px; font-weight: normal; color: var(--text-muted); margin-left: 4px;">(上傳時設定之 4 碼數字)</span>
+              </label>
+              <div style="display: flex; gap: 8px;">
+                <input type="password" id="query-student-passcode" class="form-input" placeholder="請輸入 4 碼數字密碼" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" style="flex: 1; height: 44px;" onkeypress="if(event.key==='Enter'){event.preventDefault();searchStudentUploads();}">
+                <button type="button" class="btn btn-primary" onclick="searchStudentUploads()" style="padding: 0 20px; height: 44px; white-space: nowrap; font-size: 14px;">
+                  查詢
+                </button>
               </div>
             </div>
 
-            <button type="submit" id="submit-upload-btn" class="btn btn-primary btn-block" disabled>確認上傳繳交</button>
-            
-            <!-- 進度與上傳狀態 -->
-            <div class="progress-container" id="progress-area">
-              <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-              </div>
-              <div class="status-message" id="upload-status"></div>
+            <!-- 查詢中載入動畫 -->
+            <div id="query-loader" style="display: none; text-align: center; padding: 24px 10px; color: var(--text-muted); font-size: 13.5px;">
+              <div class="skeleton" style="width: 100%; height: 24px; margin-bottom: 8px;"></div>
+              <div class="skeleton" style="width: 75%; height: 24px;"></div>
+              <div style="margin-top: 10px;">資料驗證比對中，請稍候...</div>
             </div>
-          </form>
+
+            <!-- 查詢結果清單區塊 -->
+            <div id="query-result-box" style="display: none; margin-top: 16px;"></div>
+          </div>
         </section>
 
         <!-- 區塊：注意事項 -->
@@ -2591,6 +2729,13 @@
         alert('請輸入您的中文全名');
         return;
       }
+
+      const studentPasscode = document.getElementById('student-passcode').value.trim();
+      if (!/^\d{4}$/.test(studentPasscode)) {
+        alert('請自訂 4 碼數字驗證密碼');
+        document.getElementById('student-passcode').focus();
+        return;
+      }
       
       if (!selectedFile) {
         alert('請選取要繳交的檔案');
@@ -2627,7 +2772,8 @@
           },
           body: JSON.stringify({
             action: 'uploadFile',
-            studentName: studentName,
+            studentName: studentName.trim(),
+            passcode: studentPasscode,
             workType: workType,
             fileName: selectedFile.name,
             base64Data: base64Data,
@@ -2642,9 +2788,10 @@
           if (response.success) {
             progressFill.style.width = '100%';
             statusMsg.className = 'status-message status-success';
-            statusMsg.innerText = `✓ 上傳成功！已將「${response.fileName}」存入您的專屬資料夾。`;
+            statusMsg.innerHTML = `✓ 上傳成功！已將「${escapeHtml(response.fileName)}」存入您的專屬資料夾。<br><a href="javascript:void(0)" onclick="quickViewStudentStatus('${escapeHtml(studentName.trim())}', '${escapeHtml(studentPasscode)}')" style="color: var(--accent-red); font-weight: 600; text-decoration: underline; margin-top: 6px; display: inline-block;">點此查看您的繳交狀況 ↗</a>`;
             
             document.getElementById('student-name').value = '';
+            document.getElementById('student-passcode').value = '';
             removeSelectedFile();
           } else {
             progressFill.style.width = '0%';
@@ -2668,6 +2815,203 @@
       };
       
       reader.readAsDataURL(selectedFile);
+    }
+
+    /**
+     * 切換作業區塊：上傳作業 vs 查詢繳交狀況
+     */
+    function switchUploadTab(tab) {
+      const uploadPanel = document.getElementById('view-upload-panel');
+      const queryPanel = document.getElementById('view-query-panel');
+      const btnUpload = document.getElementById('tab-btn-upload');
+      const btnQuery = document.getElementById('tab-btn-query');
+
+      if (tab === 'upload') {
+        uploadPanel.style.display = 'block';
+        queryPanel.style.display = 'none';
+        btnUpload.classList.add('active');
+        btnQuery.classList.remove('active');
+
+        // 同步姓名
+        const qName = document.getElementById('query-student-name').value.trim();
+        if (qName && !document.getElementById('student-name').value.trim()) {
+          document.getElementById('student-name').value = qName;
+        }
+        const qPass = document.getElementById('query-student-passcode').value.trim();
+        if (qPass && !document.getElementById('student-passcode').value.trim()) {
+          document.getElementById('student-passcode').value = qPass;
+        }
+      } else {
+        uploadPanel.style.display = 'none';
+        queryPanel.style.display = 'block';
+        btnQuery.classList.add('active');
+        btnUpload.classList.remove('active');
+
+        // 自動帶入姓名與密碼
+        const sName = document.getElementById('student-name').value.trim();
+        const sPass = document.getElementById('student-passcode').value.trim();
+        const queryInput = document.getElementById('query-student-name');
+        const queryPass = document.getElementById('query-student-passcode');
+        if (sName && !queryInput.value.trim()) {
+          queryInput.value = sName;
+        }
+        if (sPass && !queryPass.value.trim()) {
+          queryPass.value = sPass;
+        }
+        if (queryInput.value.trim() && queryPass.value.trim()) {
+          searchStudentUploads();
+        } else if (!queryInput.value.trim()) {
+          setTimeout(() => queryInput.focus(), 60);
+        } else if (!queryPass.value.trim()) {
+          setTimeout(() => queryPass.focus(), 60);
+        }
+      }
+    }
+
+    /**
+     * 上傳成功後快速跳轉至查詢頁籤
+     */
+    function quickViewStudentStatus(studentName, passcode) {
+      const queryInput = document.getElementById('query-student-name');
+      const queryPass = document.getElementById('query-student-passcode');
+      if (queryInput) queryInput.value = studentName;
+      if (queryPass) queryPass.value = passcode;
+      switchUploadTab('query');
+      searchStudentUploads();
+    }
+
+    /**
+     * 執行學員作業紀錄查詢 (需比對姓名與 4 碼驗證密碼)
+     */
+    function searchStudentUploads() {
+      const queryInput = document.getElementById('query-student-name');
+      const queryPass = document.getElementById('query-student-passcode');
+      const name = queryInput ? queryInput.value.trim() : '';
+      const passcode = queryPass ? queryPass.value.trim() : '';
+
+      if (!name) {
+        alert('請輸入欲查詢的學員姓名');
+        if (queryInput) queryInput.focus();
+        return;
+      }
+      if (!/^\d{4}$/.test(passcode)) {
+        alert('請輸入 4 碼數字驗證密碼');
+        if (queryPass) queryPass.focus();
+        return;
+      }
+
+      const loader = document.getElementById('query-loader');
+      const resultBox = document.getElementById('query-result-box');
+
+      loader.style.display = 'block';
+      resultBox.style.display = 'none';
+      resultBox.innerHTML = '';
+
+      const requestUrl = `${API_URL}?action=queryUploadLogs&studentName=${encodeURIComponent(name)}&passcode=${encodeURIComponent(passcode)}`;
+
+      fetch(requestUrl)
+        .then(res => {
+          if (!res.ok) throw new Error('HTTP 錯誤: ' + res.status);
+          return res.json();
+        })
+        .then(data => {
+          loader.style.display = 'none';
+          resultBox.style.display = 'block';
+
+          if (data.success && data.logs && data.logs.length > 0) {
+            renderStudentUploadLogs(name, data.logs);
+          } else if (data.success && data.notFound) {
+            renderStudentUploadEmpty(name);
+          } else if (data.error) {
+            resultBox.innerHTML = `
+              <div style="color: var(--accent-red); font-size: 13px; padding: 12px 14px; background: #fff2f2; border: 1px solid #ffd0d0; border-radius: 8px;">
+                ⚠️ ${escapeHtml(data.error)}
+              </div>`;
+          } else {
+            renderStudentUploadEmpty(name);
+          }
+        })
+        .catch(err => {
+          loader.style.display = 'none';
+          resultBox.style.display = 'block';
+          resultBox.innerHTML = `
+            <div style="color: var(--accent-red); font-size: 13px; padding: 12px 14px; background: #fff2f2; border: 1px solid #ffd0d0; border-radius: 8px;">
+              通訊異常：${err.toString()}
+            </div>`;
+        });
+    }
+
+    /**
+     * 渲染學員查詢到的繳交紀錄
+     */
+    function renderStudentUploadLogs(targetName, logs) {
+      const resultBox = document.getElementById('query-result-box');
+      
+      let html = `
+        <div style="font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span>查詢結果：<strong>${escapeHtml(targetName)}</strong></span>
+          <span style="font-size: 11.5px; font-weight: normal; color: #555; background: #e5e5ea; padding: 2px 8px; border-radius: 10px;">共 ${logs.length} 筆紀錄</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 2px;">
+      `;
+
+      logs.forEach(log => {
+        const badgeClass = getWorkTypeBadgeClass(log.workType);
+        html += `
+          <div class="query-record-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span class="worktype-badge ${badgeClass}">${escapeHtml(log.workType || '作業')}</span>
+              <span style="font-size: 11.5px; color: #777;">🕒 ${escapeHtml(log.timestamp)}</span>
+            </div>
+            <div style="font-size: 13px; color: #222; word-break: break-all; line-height: 1.45;">
+              <span style="color: #666; font-size: 12.5px;">📎 檔案明細：</span><strong>${escapeHtml(log.fileName)}</strong>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      resultBox.innerHTML = html;
+    }
+
+    /**
+     * 渲染查無資料的空狀態
+     */
+    function renderStudentUploadEmpty(targetName) {
+      const resultBox = document.getElementById('query-result-box');
+      resultBox.innerHTML = `
+        <div style="text-align: center; padding: 28px 16px; background: #fafafa; border: 1px dashed var(--border-color); border-radius: 10px; color: var(--text-muted); font-size: 13px;">
+          <div style="font-size: 26px; margin-bottom: 8px;">📋</div>
+          <div style="font-weight: 600; color: #333; margin-bottom: 4px;">查無「${escapeHtml(targetName)}」的作業紀錄</div>
+          <div style="font-size: 12px; color: #777; line-height: 1.4;">請確認輸入的中文全名是否正確，或尚未完成作業繳交。</div>
+        </div>
+      `;
+    }
+
+    /**
+     * 取得作業類型對應的彩色標籤 CSS 類別
+     */
+    function getWorkTypeBadgeClass(type) {
+      if (!type) return 'badge-other';
+      if (type.indexOf('課前') >= 0) return 'badge-pre';
+      if (type.indexOf('課堂') >= 0) return 'badge-inclass';
+      if (type.indexOf('課後') >= 0) return 'badge-post';
+      if (type.indexOf('iOS') >= 0) return 'badge-ios';
+      if (type.indexOf('Mac') >= 0) return 'badge-mac';
+      return 'badge-other';
+    }
+
+    /**
+     * HTML 特殊字元跳脫保護
+     */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     function formatBytesJS(bytes, decimals = 1) {

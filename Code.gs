@@ -39,6 +39,11 @@ function doGet(e) {
     else if (action === "getResources") {
       responseData = getSharedResources();
     } 
+    else if (action === "queryUploadLogs") {
+      var studentName = e.parameter.studentName;
+      var passcode = e.parameter.passcode;
+      responseData = queryStudentUploadLogs(studentName, passcode);
+    }
     else if (action === "debugConfig") {
       var ss = getSpreadsheet();
       var sheet = ss.getSheetByName("WebConfig");
@@ -86,8 +91,10 @@ function doPost(e) {
       var fileName = postData.fileName;
       var base64Data = postData.base64Data;
       var mimeType = postData.mimeType;
+      var workType = postData.workType;
+      var passcode = postData.passcode;
       
-      responseData = uploadFile(studentName, fileName, base64Data, mimeType, postData.workType);
+      responseData = uploadFile(studentName, fileName, base64Data, mimeType, workType, passcode);
     } 
     else if (action === "verifyAdmin") {
       var isValid = checkAdminAuth(postData.password);
@@ -127,6 +134,11 @@ function doPost(e) {
       } else {
         responseData = getUploadLogs();
       }
+    }
+    else if (action === "queryUploadLogs") {
+      var studentName = postData.studentName;
+      var passcode = postData.passcode;
+      responseData = queryStudentUploadLogs(studentName, passcode);
     }
     else {
       responseData = { success: false, error: "未知的 POST 動作 (Action)" };
@@ -321,7 +333,7 @@ function getSharedResources() {
 /**
  * 處理學生作業上傳
  */
-function uploadFile(studentName, fileName, base64Data, mimeType, workType) {
+function uploadFile(studentName, fileName, base64Data, mimeType, workType, passcode) {
   if (!studentName || studentName.trim() === "") {
     throw new Error("請輸入您的中文全名");
   }
@@ -356,7 +368,8 @@ function uploadFile(studentName, fileName, base64Data, mimeType, workType) {
     workType || "課後作業",
     fileName,
     file.getUrl(),
-    studentFolder.getUrl()
+    studentFolder.getUrl(),
+    passcode ? passcode.toString().trim() : ""
   ]);
   
   return {
@@ -464,9 +477,9 @@ function initDatabase() {
   var uploadLogsSheet = ss.getSheetByName("UploadLogs");
   if (!uploadLogsSheet) {
     uploadLogsSheet = ss.insertSheet("UploadLogs");
-    uploadLogsSheet.appendRow(["Timestamp", "StudentName", "WorkType", "FileName", "FileUrl", "FolderUrl"]);
-    uploadLogsSheet.getRange(1, 1, 1, 6).setFontWeight("bold").setBackground("#f3f3f3");
-    uploadLogsSheet.autoResizeColumns(1, 6);
+    uploadLogsSheet.appendRow(["Timestamp", "StudentName", "WorkType", "FileName", "FileUrl", "FolderUrl", "Passcode"]);
+    uploadLogsSheet.getRange(1, 1, 1, 7).setFontWeight("bold").setBackground("#f3f3f3");
+    uploadLogsSheet.autoResizeColumns(1, 7);
   } else {
     var uploadRows = uploadLogsSheet.getDataRange().getValues();
     var headers = uploadRows[0];
@@ -483,6 +496,15 @@ function initDatabase() {
         uploadLogsSheet.getRange(2, 3, defaultVals.length, 1).setValues(defaultVals);
       }
       uploadLogsSheet.autoResizeColumns(1, 6);
+    }
+    
+    // 確保 Passcode 欄位存在
+    headers = uploadLogsSheet.getDataRange().getValues()[0];
+    if (headers.indexOf("Passcode") === -1) {
+      var passCol = headers.length + 1;
+      uploadLogsSheet.getRange(1, passCol).setValue("Passcode");
+      uploadLogsSheet.getRange(1, passCol).setFontWeight("bold").setBackground("#f3f3f3");
+      uploadLogsSheet.autoResizeColumns(1, passCol);
     }
   }
   
@@ -918,6 +940,70 @@ function getUploadLogs() {
       });
     }
     return { success: true, logs: logs };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * 依學員姓名與 4 碼驗證密碼查詢作業繳交紀錄 (前台快速查詢專用，無需管理員密碼)
+ */
+function queryStudentUploadLogs(studentName, passcode) {
+  try {
+    if (!studentName || studentName.toString().trim() === "") {
+      return { success: false, error: "請輸入學員姓名" };
+    }
+    if (!passcode || passcode.toString().trim() === "") {
+      return { success: false, error: "請輸入 4 碼驗證密碼" };
+    }
+    
+    var targetName = studentName.toString().trim().toLowerCase();
+    var targetPin = passcode.toString().trim();
+    
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("UploadLogs");
+    if (!sheet) return { success: true, logs: [] };
+    
+    var rows = sheet.getDataRange().getValues();
+    if (rows.length <= 1) return { success: true, notFound: true, logs: [] };
+    
+    var headers = rows[0];
+    var passcodeColIdx = headers.indexOf("Passcode");
+    if (passcodeColIdx === -1) passcodeColIdx = 6;
+    
+    var matchedLogs = [];
+    var nameMatched = false;
+    
+    // 由新到舊 (倒序) 讀取，排除標題列 (row 0)
+    for (var i = rows.length - 1; i >= 1; i--) {
+      var rowName = (rows[i][1] || "").toString().trim().toLowerCase();
+      if (rowName === targetName) {
+        nameMatched = true;
+        var rowPin = (rows[i][passcodeColIdx] !== undefined && rows[i][passcodeColIdx] !== null) 
+          ? rows[i][passcodeColIdx].toString().trim() 
+          : "";
+        
+        // 若該筆記錄有設定密碼，需比對是否吻合；若無密碼(歷史舊資料)亦視為相符
+        if (rowPin === targetPin || rowPin === "") {
+          matchedLogs.push({
+            timestamp: formatDateString(rows[i][0]) + " " + formatTimeString(rows[i][0]),
+            studentName: rows[i][1],
+            workType: rows[i][2] || "課後作業",
+            fileName: rows[i][3]
+          });
+        }
+      }
+    }
+    
+    if (!nameMatched) {
+      return { success: true, notFound: true, logs: [] };
+    }
+    
+    if (matchedLogs.length === 0) {
+      return { success: false, error: "驗證密碼不相符，請確認您上傳時設定的 4 碼密碼" };
+    }
+    
+    return { success: true, logs: matchedLogs };
   } catch (err) {
     return { success: false, error: err.toString() };
   }
