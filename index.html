@@ -155,6 +155,81 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
     }
 
+    .calendar-hint {
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    /* 桌面端左右欄位獨立上下捲動 (Desktop Independent Column Scrolling) */
+    @media (min-width: 901px) {
+      body {
+        height: 100vh;
+        overflow: hidden;
+        padding-bottom: 0;
+      }
+
+      .main-layout-wrapper {
+        height: calc(100vh - 64px - 45px);
+        margin-top: 0;
+        overflow: hidden;
+      }
+
+      .main-layout-container {
+        height: 100%;
+      }
+
+      .grid-layout {
+        height: 100%;
+        align-items: stretch;
+        min-height: 0;
+      }
+
+      .left-column,
+      .right-column {
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-top: 24px;
+        padding-bottom: 36px;
+        padding-right: 10px;
+        padding-left: 2px;
+        scroll-behavior: smooth;
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 精緻 Apple 原生微型捲動軸樣式 */
+      .left-column::-webkit-scrollbar,
+      .right-column::-webkit-scrollbar {
+        width: 6px;
+      }
+      .left-column::-webkit-scrollbar-track,
+      .right-column::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .left-column::-webkit-scrollbar-thumb,
+      .right-column::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+      }
+      .left-column::-webkit-scrollbar-thumb:hover,
+      .right-column::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+
+      .left-column,
+      .right-column {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+      }
+    }
+
     .card-title {
       font-size: 20px;
       font-weight: 600;
@@ -1189,8 +1264,33 @@
        10. 響應式排版調整 (Responsive Adjustments)
        ========================================================================== */
     @media (max-width: 900px) {
+      body {
+        overflow-y: auto;
+        height: auto;
+        padding-bottom: 60px;
+      }
+
+      .main-layout-wrapper {
+        height: auto;
+        overflow: visible;
+        margin-top: 20px;
+      }
+
+      .main-layout-container {
+        height: auto;
+      }
+
       .grid-layout {
         grid-template-columns: 1fr;
+        height: auto;
+        gap: 0;
+      }
+
+      .left-column,
+      .right-column {
+        height: auto;
+        overflow: visible;
+        padding: 0;
       }
       
       .calendar-table td {
@@ -1394,36 +1494,42 @@
         <a href="#calendar-section">課程表</a>
         <a href="#details-section">課程說明</a>
         <a href="#location-section">上課地點</a>
-        <a href="#resources-section">教材共享</a>
+        <a href="#notice-section">注意事項</a>
         <a href="#upload-section">作業繳交</a>
+        <a href="#resources-section">教材共享</a>
         <a href="javascript:void(0)" onclick="triggerAdminLogin()" class="admin-nav-link" id="nav-admin-link" title="管理控制台">⚙️</a>
       </nav>
     </div>
   </header>
 
-  <div class="container" style="margin-top: 40px;">
-    <!-- 2. 主標題區 (移除子標籤) -->
+  <main class="main-layout-wrapper">
+    <div class="container main-layout-container">
+      <!-- 2. 主標題區 (移除子標籤) -->
 
-    <!-- 3. 主版型 Grid -->
-    <div class="grid-layout">
-      
-      <!-- 左欄 -->
-      <div class="left-column">
+      <!-- 3. 主版型 Grid -->
+      <div class="grid-layout">
         
-        <!-- 區塊：課程表 -->
-        <section id="calendar-section" class="card">
-          <div class="card-title">
-            <div class="calendar-header">
-              <span><span class="apple-logo"></span>Sales Training 課程表</span>
-              <div style="display: flex; align-items: center;">
-                <select id="month-selector" class="month-select" style="display: none;" onchange="onMonthChange()"></select>
-                <span id="admin-indicator" class="admin-badge" style="display: none;">管理員模式</span>
+        <!-- 左欄 -->
+        <div class="left-column">
+          
+          <!-- 區塊：課程表 -->
+          <section id="calendar-section" class="card">
+            <div class="card-title">
+              <div class="calendar-header">
+                <span><span class="apple-logo"></span>Sales Training 課程表</span>
+                <div style="display: flex; align-items: center;">
+                  <select id="month-selector" class="month-select" style="display: none;" onchange="onMonthChange()"></select>
+                  <span id="admin-indicator" class="admin-badge" style="display: none;">管理員模式</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div id="calendar-loader" class="skeleton skeleton-calendar"></div>
-          <div id="calendar-container"></div>
-        </section>
+            <div id="calendar-loader" class="skeleton skeleton-calendar"></div>
+            <div id="calendar-container"></div>
+            <div class="calendar-hint">
+              <span style="font-size: 13px;">💡</span>
+              <span>點擊課程代碼可查看詳細課程資訊。</span>
+            </div>
+          </section>
 
         <!-- 區塊：課程詳細說明 -->
         <section id="details-section" class="card" style="opacity: 1; transition: opacity 0.25s ease;">
@@ -1496,7 +1602,7 @@
       <!-- 右欄 -->
       <div class="right-column">
         
-        <!-- 區塊：上課地點與地圖 -->
+        <!-- 1. 區塊：上課地點與地圖 -->
         <section id="location-section" class="card">
           <div class="card-title">上課地點</div>
           <div id="location-address" style="font-size: 14px; font-weight: 600; margin-bottom: 4px;"></div>
@@ -1509,17 +1615,13 @@
           </div>
         </section>
 
-        <!-- 區塊：共享資源下載區 (Resource) -->
-        <section id="resources-section" class="card">
-          <div class="card-title">共享資源下載</div>
-          <div id="resources-loader">
-            <div class="skeleton" style="width: 100%;"></div>
-            <div class="skeleton" style="width: 90%;"></div>
-          </div>
-          <div class="resource-list" id="resource-container"></div>
+        <!-- 2. 區塊：注意事項 -->
+        <section id="notice-section" class="card">
+          <div class="card-title">其他重要注意事項</div>
+          <ol class="notice-list" id="notices"></ol>
         </section>
 
-        <!-- 區塊：學員作業上傳區 (Upload) -->
+        <!-- 3. 區塊：學員作業上傳區 (Upload) -->
         <section id="upload-section" class="card">
           <div class="card-title">課程練習與作業繳交</div>
 
@@ -1621,18 +1723,21 @@
           </div>
         </section>
 
-        <!-- 區塊：注意事項 -->
-        <section id="notice-section" class="card">
-          <div class="card-title">其他重要注意事項</div>
-          <ol class="notice-list" id="notices"></ol>
+        <!-- 4. 區塊：共享資源下載區 (Resource) -->
+        <section id="resources-section" class="card">
+          <div class="card-title">共享資源下載</div>
+          <div id="resources-loader">
+            <div class="skeleton" style="width: 100%;"></div>
+            <div class="skeleton" style="width: 90%;"></div>
+          </div>
+          <div class="resource-list" id="resource-container"></div>
         </section>
-
-
 
       </div>
 
     </div>
   </div>
+</main>
 
   <!-- 固定在最下方的聯絡資訊欄 -->
   <div class="fixed-footer" id="fixed-footer-bar">
@@ -1979,6 +2084,20 @@
     
     // 初始化網頁
     window.onload = function() {
+      // 導覽列平滑捲動支援 (相容左右獨立捲動容器)
+      document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          const hash = this.getAttribute('href');
+          if (hash && hash.length > 1) {
+            const targetEl = document.querySelector(hash);
+            if (targetEl) {
+              e.preventDefault();
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        });
+      });
+
       // 顯示管理員狀態與檢查登入
       if (isAdmin) {
         document.getElementById('admin-indicator').style.display = 'inline-block';
